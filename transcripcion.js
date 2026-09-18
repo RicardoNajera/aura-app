@@ -23,14 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = canvas.getContext('2d');
 
   let isRecording = false;
-  let audioCtx = null;
-  let analyser = null;
-  let microphoneStream = null;
-  let dataArray = null;
-  let animationId = null;
   let recognition = null;
   let confirmedText = '';
   let smoothBars = [];
+  let speechActivity = 0.15; // Nivel base de actividad simulada
 
   // Adaptación Retina/4K Canvas
   function resizeCanvas() {
@@ -68,7 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
     instance.maxAlternatives = 1;
     instance.lang = 'es-MX';
 
+    // Eventos para alimentar el visualizador orgánico sin bloquear el hardware del micrófono
+    instance.onsoundstart = () => { speechActivity = 0.4; };
+    instance.onspeechstart = () => { speechActivity = 0.7; };
+    instance.onsoundend = () => { speechActivity = 0.15; };
+
     instance.onresult = (event) => {
+      speechActivity = 1.0; // Pico visual máximo al detectar palabras
       let interimText = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript;
@@ -90,45 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
-    instance.onend = () => {
-      if (isRecording) {
-        try {
-          recognition.start();
-        } catch (err) {}
-      }
-    };
-
     return instance;
-  }
-
-  async function ensureAudioContext() {
-    if (!audioCtx) {
-      try {
-        microphoneStream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-          video: false
-        });
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(microphoneStream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-        analyser.smoothingTimeConstant = 0.8;
-        source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-      } catch (err) {
-        console.warn('AudioContext no disponible inmediatamente:', err);
-      }
-    }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      await audioCtx.resume();
-    }
   }
 
   function startSession() {
     if (isRecording) return;
     isRecording = true;
+    speechActivity = 0.3; // Impulso visual inicial al presionar
 
-    // Feedback visual instantáneo (0ms lag)
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
     coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
@@ -136,16 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
     statusBadge.textContent = 'En Vivo';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
 
-    // Inicializar canal de audio y reconocimiento
-    ensureAudioContext();
-
     if (!recognition) {
       recognition = setupSpeechRecognition();
     }
     if (recognition) {
       try {
         recognition.start();
-      } catch (e) {}
+      } catch (e) {
+        console.warn('El motor de voz ya estaba activo o falló:', e);
+      }
     }
   }
 
@@ -167,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
   }
 
-  // Bucle de renderizado continuo y fluido (evita congelamiento al presionar)
+  // Bucle de renderizado continuo y fluido
   function loop() {
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width / dpr;
@@ -177,33 +147,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const barCount = width < 380 ? 18 : 26;
     const gap = 3;
     const barWidth = (width / barCount) - gap;
-    let sensitivity = 0;
 
     if (isRecording) {
-      if (analyser && dataArray) {
-        analyser.getByteFrequencyData(dataArray);
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-        sensitivity = (sum / dataArray.length) / 255;
-      } else {
-        sensitivity = 0.2 + (Math.sin(Date.now() * 0.008) * 0.1);
-      }
+      // Decaimiento orgánico de la actividad para que no se quede estático
+      speechActivity = Math.max(0.15, speechActivity - 0.015);
+      
+      // Sensibilidad visual combinando los eventos del micrófono y una onda sinusoidal
+      let sensitivity = speechActivity + (Math.sin(Date.now() * 0.008) * 0.1);
 
-      sensVal.textContent = `${(sensitivity * 100).toFixed(1)}%`;
+      sensVal.textContent = `${(Math.min(100, sensitivity * 100)).toFixed(1)}%`;
       ambientGlow.style.transform = `scale(${1 + (sensitivity * 0.3)})`;
       ambientGlow.style.opacity = `${0.3 + (sensitivity * 0.7)}`;
 
       let x = gap / 2;
       for (let i = 0; i < barCount; i++) {
-        let rawTarget = 0.05;
-        if (analyser && dataArray) {
-          const idx = Math.floor((i / barCount) * dataArray.length);
-          rawTarget = dataArray[idx] / 255;
-        } else {
-          rawTarget = Math.abs(Math.sin((Date.now() * 0.006) + (i * 0.4))) * sensitivity;
+        // Base de la onda
+        let rawTarget = Math.abs(Math.sin((Date.now() * 0.005) + (i * 0.4))) * sensitivity;
+        
+        // Añadir picos caóticos si hay actividad de voz fuerte para simular decibelios
+        if (speechActivity > 0.4) {
+          rawTarget += Math.random() * (speechActivity * 0.6);
         }
+        
+        rawTarget = Math.min(1, rawTarget);
 
-        // Interpolación lineal (LERP) para suavizar saltos
+        // Interpolación lineal (LERP) para transiciones muy suaves
         smoothBars[i] = (smoothBars[i] || 0) * 0.75 + rawTarget * 0.25;
 
         const barHeight = Math.max(4, smoothBars[i] * (height * 0.8));
@@ -221,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         x += barWidth + gap;
       }
     } else {
-      // Estado reposo animado
+      // Estado de reposo animado
       sensVal.textContent = '0.0%';
       ambientGlow.style.transform = 'scale(1)';
       ambientGlow.style.opacity = '0.25';
@@ -237,16 +205,15 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Reset paulatino de amplitudes
       for (let i = 0; i < barCount; i++) {
-        smoothBars[i] = (smoothBars[i] || 0) * 0.8;
+        smoothBars[i] = (smoothBars[i] || 0) * 0.8; // Apagar barras suavemente
       }
     }
 
     requestAnimationFrame(loop);
   }
 
-  // Comportamiento estilo Walkie-Talkie (Push-to-Talk)
+  // Eventos Push-to-Talk nativos (Walkie-Talkie)
   coreTrigger.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     coreTrigger.setPointerCapture?.(e.pointerId);
@@ -262,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopSession();
   });
 
-  // Evitar menú contextual táctil en móviles al dejar presionado
+  // Evita que aparezca el menú de "guardar imagen/texto" al mantener presionado en móviles
   coreTrigger.addEventListener('contextmenu', (e) => e.preventDefault());
 
   copyBtn.addEventListener('click', () => {
