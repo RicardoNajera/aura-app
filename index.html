@@ -27,7 +27,6 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Holographic glassmorphism effect */
     .glass-panel {
       background: rgba(13, 10, 38, 0.65);
       backdrop-filter: blur(24px);
@@ -41,16 +40,10 @@
       box-shadow: 0 0 50px rgba(0, 240, 255, 0.35), inset 0 0 30px rgba(0, 240, 255, 0.15);
     }
 
-    /* Custom glow utilities */
     .text-glow-cyan {
       text-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
     }
 
-    .text-glow-pink {
-      text-shadow: 0 0 15px rgba(255, 0, 127, 0.7);
-    }
-
-    /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -65,18 +58,6 @@
       background: rgba(0, 240, 255, 0.6);
     }
 
-    /* Pulse animations for core state */
-    @keyframes corePulse {
-      0% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 25px var(--quantum-cyan)); }
-      100% { transform: scale(1); opacity: 0.8; }
-    }
-
-    .core-pulsing {
-      animation: corePulse 2s infinite ease-in-out;
-    }
-
-    /* Scanline overlay for cyber aesthetic */
     .scanlines {
       background: linear-gradient(
         to bottom,
@@ -131,10 +112,10 @@
           <svg class="w-3.5 h-3.5 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
           Neural Transcription Matrix
         </span>
-        <span id="word-counter" class="text-indigo-300 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-500/30">0 Words</span>
+        <span id="word-counter" class="text-indigo-300 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-500/30">0 Palabras</span>
       </div>
       <div class="relative rounded-2xl bg-slate-950/70 border border-cyan-500/20 p-4 shadow-inner min-h-[150px] max-h-[220px] overflow-y-auto">
-        <textarea id="transcript" class="w-full h-32 bg-transparent border-none text-slate-100 placeholder-slate-600 font-sans text-sm leading-relaxed resize-none outline-none select-text" readonly placeholder="Inicia la matriz neural y comienza a hablar. Las ondas dinámicas y el reconocimiento de voz procesarán tu audio en tiempo real..."></textarea>
+        <textarea id="transcript" class="w-full h-32 bg-transparent border-none text-slate-100 placeholder-slate-600 font-sans text-sm leading-relaxed resize-none outline-none select-text" placeholder="Haz clic en la matriz inferior y comienza a hablar..."></textarea>
         <div class="absolute bottom-2 right-3 pointer-events-none flex items-center gap-1 opacity-40">
           <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
           <span class="text-[9px] font-mono-custom text-cyan-300">LIVE SYNC</span>
@@ -144,17 +125,12 @@
 
     <!-- Dynamic Visualizer & Microphone Core Center -->
     <div class="flex flex-col items-center gap-4">
-      
-      <!-- Interactive Holographic Orb / Visualizer Canvas Container -->
       <div class="relative w-full h-36 rounded-2xl bg-gradient-to-b from-slate-900/80 to-slate-950/90 border border-cyan-500/30 overflow-hidden flex items-center justify-center cursor-pointer group shadow-[0_0_25px_rgba(0,240,255,0.1)] transition-all duration-300 hover:border-cyan-400 hover:shadow-[0_0_35px_rgba(0,240,255,0.25)]" id="core-trigger">
         
-        <!-- Background subtle glow representing voice power -->
         <div class="absolute inset-0 opacity-25 transition-opacity duration-150" id="ambient-glow" style="background: radial-gradient(circle, rgba(0,240,255,0.4) 0%, transparent 70%); transform: scale(1);"></div>
 
-        <!-- Canvas for dynamic audio frequency bars & particle wave -->
         <canvas id="audio-canvas" class="absolute inset-0 w-full h-full z-10 pointer-events-none"></canvas>
 
-        <!-- Center Interactive State UI inside visualizer -->
         <div class="relative z-20 flex flex-col items-center gap-2 pointer-events-none transition-transform duration-300 group-hover:scale-105">
           <div class="w-14 h-14 rounded-full bg-cyan-950/80 border-2 border-cyan-400 flex items-center justify-center text-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.5)] transition-all duration-300" id="core-icon-container">
             <svg class="w-7 h-7 transition-transform duration-300" id="mic-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,20 +140,18 @@
           <span class="text-xs font-mono-custom font-bold tracking-widest text-cyan-300 text-glow-cyan uppercase" id="core-label">Click para Activar Matriz</span>
         </div>
 
-        <!-- Sensitivity meter live indicator -->
         <div class="absolute top-2.5 right-3.5 z-20 flex items-center gap-1.5 bg-slate-900/80 px-2.5 py-1 rounded-md border border-cyan-500/30">
           <span class="text-[10px] font-mono-custom text-slate-400">SENSIBILIDAD:</span>
           <span class="text-[10px] font-mono-custom text-cyan-400 font-bold" id="sens-val">0.0%</span>
         </div>
       </div>
-
     </div>
 
     <!-- Action Controls -->
     <div class="grid grid-cols-2 gap-3 pt-1">
       <button id="copy-btn" class="relative group overflow-hidden px-4 py-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 font-semibold text-xs tracking-wider uppercase transition-all duration-300 hover:bg-cyan-900/40 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2 active:scale-95">
         <svg class="w-4 h-4 text-cyan-400 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-        <span>Copiar Texto</span>
+        <span id="copy-label">Copiar Texto</span>
       </button>
 
       <button id="clear-btn" class="relative group overflow-hidden px-4 py-3 rounded-xl bg-pink-950/30 border border-pink-500/30 text-pink-300 font-semibold text-xs tracking-wider uppercase transition-all duration-300 hover:bg-pink-900/40 hover:border-pink-400 hover:shadow-[0_0_20px_rgba(255,0,127,0.3)] flex items-center justify-center gap-2 active:scale-95">
@@ -188,8 +162,15 @@
 
   </div>
 
-  <!-- Embedded Quantum Application Logic -->
   <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW activo:', reg.scope))
+          .catch(err => console.debug('Modo local sin SW:', err));
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const coreTrigger = document.getElementById('core-trigger');
       const coreLabel = document.getElementById('core-label');
@@ -201,6 +182,7 @@
       const ambientGlow = document.getElementById('ambient-glow');
       const coreIconContainer = document.getElementById('core-icon-container');
       const copyBtn = document.getElementById('copy-btn');
+      const copyLabel = document.getElementById('copy-label');
       const clearBtn = document.getElementById('clear-btn');
       const canvas = document.getElementById('audio-canvas');
       const ctx = canvas.getContext('2d');
@@ -212,9 +194,8 @@
       let dataArray = null;
       let animationId = null;
       let recognition = null;
-      let currentTranscript = '';
+      let confirmedText = '';
 
-      // Set canvas resolution cleanly
       function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width * window.devicePixelRatio;
@@ -224,39 +205,36 @@
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
-      // Check SpeechRecognition compatibility
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'es-ES';
+        recognition.lang = 'es-MX';
 
         recognition.onresult = (event) => {
-          let interim = '';
-          let final = '';
+          let interimText = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              final += event.results[i][0].transcript + ' ';
+              confirmedText += transcript + ' ';
             } else {
-              interim += event.results[i][0].transcript;
+              interimText += transcript;
             }
           }
-          if (final) {
-            currentTranscript += final;
-          }
-          transcriptArea.value = currentTranscript + (interim ? interim : '');
+          transcriptArea.value = confirmedText + interimText;
           transcriptArea.scrollTop = transcriptArea.scrollHeight;
           updateWordCount(transcriptArea.value);
         };
 
         recognition.onerror = (e) => {
-          console.warn("Speech Recognition notice:", e.error);
+          console.warn("Reconocimiento de voz:", e.error);
         };
 
         recognition.onend = () => {
-          if (isRecording && recognition) {
-            try { recognition.start(); } catch(err) {}
+          // Reanudación automática continua si sigue activo
+          if (isRecording) {
+            try { recognition.start(); } catch (err) {}
           }
         };
       }
@@ -266,7 +244,6 @@
         wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
       }
 
-      // Initialize Web Audio API for real-time microphone volume/frequency analysis
       async function initAudioSystem() {
         try {
           microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -276,21 +253,21 @@
           }
           const source = audioCtx.createMediaStreamSource(microphoneStream);
           analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 128; // Small FFT size for responsive reactive frequency bars
+          analyser.fftSize = 128;
           source.connect(analyser);
-          
           dataArray = new Uint8Array(analyser.frequencyBinCount);
           return true;
         } catch (err) {
-          console.error("Audio permission error:", err);
-          showNotification("Permiso de micrófono denegado o no disponible.");
+          showNotification("Permiso de micrófono no otorgado.");
           return false;
         }
       }
 
-      // Stop Audio & Recognition
       function stopSession() {
         isRecording = false;
+        if (recognition) {
+          try { recognition.stop(); } catch (e) {}
+        }
         if (microphoneStream) {
           microphoneStream.getTracks().forEach(track => track.stop());
           microphoneStream = null;
@@ -299,16 +276,12 @@
           audioCtx.close();
           audioCtx = null;
         }
-        if (recognition) {
-          try { recognition.stop(); } catch(e) {}
-        }
         if (animationId) {
           cancelAnimationFrame(animationId);
         }
 
-        // Reset UI state
         coreTrigger.classList.remove('glass-panel-active');
-        coreIconContainer.classList.remove('bg-cyan-500', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
+        coreIconContainer.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
         coreIconContainer.classList.add('bg-cyan-950/80', 'text-cyan-400');
         coreLabel.textContent = 'Click para Activar Matriz';
         statusBadge.textContent = 'Standby';
@@ -320,8 +293,12 @@
         drawIdleVisualizer();
       }
 
-      // Start Session
       async function startSession() {
+        if (!SpeechRecognition) {
+          showNotification('Tu navegador no soporta SpeechRecognition.');
+          return;
+        }
+
         const success = await initAudioSystem();
         if (!success) return;
 
@@ -329,24 +306,24 @@
         coreTrigger.classList.add('glass-panel-active');
         coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
         coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
-        coreLabel.textContent = 'Matriz Neural Activa (Grabando)';
+        coreLabel.textContent = 'Escuchando en Tiempo Real';
         statusBadge.textContent = 'En Vivo';
         statusDot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
 
-        if (recognition) {
-          try { recognition.start(); } catch(e) {}
+        try {
+          recognition.start();
+        } catch (e) {
+          console.debug('Recognition ya inicializado:', e);
         }
 
         renderVisualizer();
       }
 
-      // Idle visualizer wave when not recording
       function drawIdleVisualizer() {
         const width = canvas.width / window.devicePixelRatio;
         const height = canvas.height / window.devicePixelRatio;
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
         const centerY = height / 2;
         ctx.beginPath();
         ctx.moveTo(0, centerY);
@@ -359,35 +336,27 @@
         ctx.stroke();
       }
 
-      // Dynamic real-time visualizer driven by actual microphone sensitivity/volume
       function renderVisualizer() {
         if (!isRecording || !analyser) return;
 
         animationId = requestAnimationFrame(renderVisualizer);
-
         analyser.getByteFrequencyData(dataArray);
 
-        // Calculate average volume sensitivity (0 to 1)
         let sum = 0;
         for (let i = 0; i < dataArray.length; i++) {
           sum += dataArray[i];
         }
-        const average = sum / dataArray.length;
-        const sensitivity = (average / 255); // Normalized 0.0 to 1.0
-        
+        const sensitivity = (sum / dataArray.length) / 255;
         sensVal.textContent = `${(sensitivity * 100).toFixed(1)}%`;
-        
-        // Dynamically adjust ambient glow and orb scale based on voice strength
+
         const scaleFactor = 1 + (sensitivity * 0.4);
         ambientGlow.style.transform = `scale(${scaleFactor})`;
         ambientGlow.style.opacity = 0.2 + (sensitivity * 0.6);
 
         const width = canvas.width / window.devicePixelRatio;
         const height = canvas.height / window.devicePixelRatio;
-
         ctx.clearRect(0, 0, width, height);
 
-        // Draw frequency spectrum bars reacting to voice
         const barCount = 28;
         const barWidth = (width / barCount) - 3;
         let x = 4;
@@ -397,17 +366,13 @@
           const barHeightPercent = dataArray[dataIndex] / 255;
           const barHeight = Math.max(6, barHeightPercent * (height * 0.8));
 
-          // Gradient color shifting based on amplitude
           const gradient = ctx.createLinearGradient(0, height, 0, 0);
           gradient.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
           gradient.addColorStop(0.7, 'rgba(121, 40, 202, 0.8)');
           gradient.addColorStop(1, 'rgba(255, 0, 127, 0.95)');
 
           ctx.fillStyle = gradient;
-          
           const y = (height - barHeight) / 2;
-          
-          // Draw rounded futuristic bars
           ctx.beginPath();
           ctx.roundRect(x, y, barWidth, barHeight, 4);
           ctx.fill();
@@ -416,7 +381,6 @@
         }
       }
 
-      // Toggle recording session on click
       coreTrigger.addEventListener('click', () => {
         if (!isRecording) {
           startSession();
@@ -425,56 +389,46 @@
         }
       });
 
-      // Copy text handler
       copyBtn.addEventListener('click', () => {
-        const textToCopy = transcriptArea.value;
-        if (!textToCopy.trim()) {
-          showNotification('No hay texto neural para copiar.');
+        const textToCopy = transcriptArea.value.trim();
+        if (!textToCopy) {
+          showNotification('No hay texto para copiar.');
           return;
         }
-        const textArea = document.createElement("textarea");
-        textArea.value = textToCopy;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          showNotification('¡Texto copiado al portapapeles!');
-        } catch (err) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          copyLabel.textContent = '¡Copiado!';
+          setTimeout(() => copyLabel.textContent = 'Copiar Texto', 1500);
+        }).catch(() => {
           showNotification('Error al copiar el texto.');
-        }
-        document.body.removeChild(textArea);
+        });
       });
 
-      // Clear memory handler
       clearBtn.addEventListener('click', () => {
-        currentTranscript = '';
+        confirmedText = '';
         transcriptArea.value = '';
         updateWordCount('');
-        showNotification('Memoria neural reiniciada.');
+        showNotification('Memoria reiniciada.');
       });
 
-      // Custom notification toast element inside UI
       function showNotification(msg) {
         const existingToast = document.getElementById('quantum-toast');
         if (existingToast) existingToast.remove();
 
         const toast = document.createElement('div');
         toast.id = 'quantum-toast';
-        toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/95 border border-cyan-400 text-cyan-300 px-5 py-2.5 rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.4)] text-xs font-mono-custom tracking-wider animate-bounce';
+        toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/95 border border-cyan-400 text-cyan-300 px-5 py-2.5 rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.4)] text-xs font-mono-custom tracking-wider';
         toast.textContent = msg;
         document.body.appendChild(toast);
 
         setTimeout(() => {
           toast.style.opacity = '0';
-          toast.style.transition = 'opacity 0.5s ease';
-          setTimeout(() => toast.remove(), 500);
-        }, 2500);
+          toast.style.transition = 'opacity 0.4s ease';
+          setTimeout(() => toast.remove(), 400);
+        }, 2200);
       }
 
-      // Initialize idle visualizer on load
       drawIdleVisualizer();
     });
   </script>
-
 </body>
 </html>
