@@ -11,12 +11,7 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition = null;
 let isHolding = false;
 let sessionTranscript = '';
-
-// Variables para el Analizador de Audio de las ondas Siri
-let audioContext = null;
-let analyser = null;
-let microphone = null;
-let animationId = null;
+let waveInterval = null;
 
 const micBtn = document.getElementById('mic-btn');
 const micLabel = document.getElementById('mic-label');
@@ -75,58 +70,30 @@ if (SpeechRecognition) {
   alert('Tu navegador no soporta API de Voz.');
 }
 
-// Iniciar Analizador de Audio Real para mover las barras con la voz
-async function startAudioAnalyzer() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioContext.createAnalyser();
-    microphone = audioContext.createMediaStreamSource(stream);
-    
-    microphone.connect(analyser);
-    analyser.fftSize = 64;
-    
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+// Motor de Animación Orgánica estilo Siri en tiempo real
+function startSiriAnimation() {
+  if (waveInterval) clearInterval(waveInterval);
 
-    function renderWaves() {
-      if (!isHolding) return;
-      analyser.getByteFrequencyData(dataArray);
+  waveInterval = setInterval(() => {
+    if (!isHolding) return;
 
-      waveBars.forEach((bar, index) => {
-        // Tomar valores de frecuencia y mapearlos a una altura visual orgánica
-        const value = dataArray[index % dataArray.length] || 10;
-        const height = Math.max(6, (value / 255) * 36);
-        bar.style.height = `${height}px`;
-      });
-
-      animationId = requestAnimationFrame(renderWaves);
-    }
-
-    renderWaves();
-  } catch (err) {
-    console.warn('No se pudo acceder al micrófono para las ondas:', err);
-    // Fallback simulado si el navegador bloquea el stream duplicado
-    simulateOrganicWaves();
-  }
+    waveBars.forEach((bar, index) => {
+      // Generamos curvas armónicas combinando senos y factores aleatorios para simular ondas de voz reales
+      const randomFactor = Math.random();
+      const waveShape = Math.sin(Date.now() / 120 + index * 0.5);
+      
+      // Altura dinámica fluida entre 6px y 34px
+      const height = Math.floor(18 + waveShape * 14 * randomFactor);
+      bar.style.height = `${Math.max(6, height)}px`;
+    });
+  }, 65); // Refresco ultra fluido
 }
 
-function stopAudioAnalyzer() {
-  if (animationId) cancelAnimationFrame(animationId);
-  if (audioContext && audioContext.state !== 'closed') {
-    audioContext.close();
-  }
-  // Resetear barras
-  waveBars.forEach(bar => bar.style.height = '10px');
-}
-
-// Fallback de animación orgánica si el analizador directo choca con el reconocimiento
-function simulateOrganicWaves() {
-  if (!isHolding) return;
+function stopSiriAnimation() {
+  if (waveInterval) clearInterval(waveInterval);
   waveBars.forEach(bar => {
-    const randomHeight = Math.floor(Math.random() * 28) + 6;
-    bar.style.height = `${randomHeight}px`;
+    bar.style.height = '6px';
   });
-  animationId = setTimeout(simulateOrganicWaves, 80);
 }
 
 // Funciones Push-To-Talk
@@ -136,7 +103,7 @@ function startListening(e) {
 
   isHolding = true;
   updateUI(true);
-  startAudioAnalyzer();
+  startSiriAnimation();
 
   if (sessionTranscript.trim() !== '') {
     sessionTranscript += '\n• ';
@@ -157,7 +124,7 @@ function stopListening(e) {
 
   isHolding = false;
   updateUI(false);
-  stopAudioAnalyzer();
+  stopSiriAnimation();
 
   try {
     recognition.stop();
@@ -166,7 +133,7 @@ function stopListening(e) {
   }
 }
 
-// Eventos de control táctil y mouse
+// Eventos táctiles y de mouse
 micBtn.addEventListener('mousedown', startListening);
 micBtn.addEventListener('mouseup', stopListening);
 micBtn.addEventListener('mouseleave', stopListening);
