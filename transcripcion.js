@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let confirmedText = '';
   let smoothBars = [];
   let speechActivity = 0.15; 
+  let stopTimeout = null; // Controla el tiempo extra de grabación
 
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
@@ -64,10 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const instance = new SpeechRecognition();
     instance.continuous = true;
-    // APAGADO PARA GARANTIZAR ESTABILIDAD EN ANDROID: Solo entrega texto al soltar el botón
     instance.interimResults = false; 
     instance.maxAlternatives = 1;
     instance.lang = 'es-MX';
+
+    // Evento clave: Se dispara solo cuando Android REALMENTE empieza a escuchar
+    instance.onstart = () => {
+      if (navigator.vibrate) navigator.vibrate(50); // Pequeña vibración de confirmación
+      if (isRecording) {
+        coreLabel.textContent = '¡Habla ahora! (Suelta al terminar)';
+      }
+    };
 
     instance.onsoundstart = () => { speechActivity = 0.4; };
     instance.onspeechstart = () => { speechActivity = 0.7; };
@@ -90,16 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     instance.onend = () => {
-      // Restaura el texto de la interfaz una vez que el motor termina de procesar y entregar el resultado
       if (!isRecording) {
         coreLabel.textContent = 'Mantén presionado para hablar';
+        statusBadge.textContent = 'Standby';
+        statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
       }
     };
 
     instance.onerror = (e) => {
       if (e.error === 'not-allowed') {
         showNotification('Permiso de micrófono denegado.');
-        stopSession();
+        forceStopSession();
       }
     };
 
@@ -107,6 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startSession() {
+    // Si había un apagado programado, lo cancelamos
+    if (stopTimeout) {
+      clearTimeout(stopTimeout);
+      stopTimeout = null;
+    }
+
     if (isRecording) return;
     isRecording = true;
     speechActivity = 0.3; 
@@ -114,7 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
     coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
-    coreLabel.textContent = 'Escuchando... (Suelta para procesar)';
+    
+    // Estado intermedio mientras el hardware despierta
+    coreLabel.textContent = 'Iniciando micro...';
     statusBadge.textContent = 'En Vivo';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
 
@@ -128,23 +145,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function stopSession() {
+  // Se llama al soltar el botón
+  function releaseSession() {
     if (!isRecording) return;
-    isRecording = false;
-
-    if (recognition) {
-      try {
-        recognition.stop();
-        // Indica visualmente que se está procesando el audio en los servidores
-        coreLabel.textContent = 'Procesando texto...';
-      } catch (e) {}
-    }
-
+    
+    // Cambiamos la interfaz de inmediato para que sepas que ya soltaste
     coreTrigger.classList.remove('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     coreIconContainer.classList.add('bg-cyan-950/80', 'text-cyan-400');
-    statusBadge.textContent = 'Standby';
-    statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
+    coreLabel.textContent = 'Procesando texto...';
+
+    // Pero damos 800ms de gracia al micrófono antes de cortarlo
+    stopTimeout = setTimeout(() => {
+      forceStopSession();
+    }, 800);
+  }
+
+  // Apaga realmente el motor de reconocimiento
+  function forceStopSession() {
+    isRecording = false;
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {}
+    }
   }
 
   function loop() {
@@ -222,11 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   coreTrigger.addEventListener('pointerup', (e) => {
     e.preventDefault();
-    stopSession();
+    releaseSession();
   });
 
   coreTrigger.addEventListener('pointercancel', (e) => {
-    stopSession();
+    releaseSession();
   });
 
   coreTrigger.addEventListener('contextmenu', (e) => e.preventDefault());
