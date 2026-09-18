@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRecording = false;
   let recognition = null;
   let confirmedText = '';
-  let currentSessionText = '';
   let smoothBars = [];
   let speechActivity = 0.15; 
 
@@ -51,10 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
   }
 
-  // Sincronizar memoria interna si el usuario edita el texto a mano
   transcriptArea.addEventListener('input', (e) => {
     confirmedText = e.target.value + ' ';
-    currentSessionText = ''; 
     updateWordCount(e.target.value);
   });
 
@@ -67,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const instance = new SpeechRecognition();
     instance.continuous = true;
-    instance.interimResults = true;
+    // APAGADO PARA GARANTIZAR ESTABILIDAD EN ANDROID: Solo entrega texto al soltar el botón
+    instance.interimResults = false; 
     instance.maxAlternatives = 1;
     instance.lang = 'es-MX';
 
@@ -76,27 +74,25 @@ document.addEventListener('DOMContentLoaded', () => {
     instance.onsoundend = () => { speechActivity = 0.15; };
 
     instance.onresult = (event) => {
-      speechActivity = 1.0; 
-      let sessionText = '';
-
-      // Reconstruir la oración completa de la sesión actual sin confiar en el resultIndex del navegador (evita duplicados en Android)
-      for (let i = 0; i < event.results.length; ++i) {
-        sessionText += event.results[i][0].transcript;
+      let finalSegment = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalSegment += event.results[i][0].transcript;
+        }
       }
 
-      currentSessionText = sessionText.replace(/\s+/g, ' ').trim();
-
-      // Mostrar texto confirmado + lo que se está hablando actualmente
-      transcriptArea.value = (confirmedText + ' ' + currentSessionText).trim();
-      transcriptArea.scrollTop = transcriptArea.scrollHeight;
-      updateWordCount(transcriptArea.value);
+      if (finalSegment.trim()) {
+        confirmedText = (confirmedText + ' ' + finalSegment.trim()).trim() + ' ';
+        transcriptArea.value = confirmedText.trim();
+        transcriptArea.scrollTop = transcriptArea.scrollHeight;
+        updateWordCount(transcriptArea.value);
+      }
     };
 
     instance.onend = () => {
-      // Consolidar la oración en la memoria permanente solo cuando el motor finaliza la escucha
-      if (currentSessionText) {
-        confirmedText = (confirmedText + ' ' + currentSessionText).trim() + ' ';
-        currentSessionText = '';
+      // Restaura el texto de la interfaz una vez que el motor termina de procesar y entregar el resultado
+      if (!isRecording) {
+        coreLabel.textContent = 'Mantén presionado para hablar';
       }
     };
 
@@ -118,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
     coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
-    coreLabel.textContent = 'Transmitiendo... (Suelta para enviar)';
+    coreLabel.textContent = 'Escuchando... (Suelta para procesar)';
     statusBadge.textContent = 'En Vivo';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
 
@@ -139,13 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recognition) {
       try {
         recognition.stop();
+        // Indica visualmente que se está procesando el audio en los servidores
+        coreLabel.textContent = 'Procesando texto...';
       } catch (e) {}
     }
 
     coreTrigger.classList.remove('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     coreIconContainer.classList.add('bg-cyan-950/80', 'text-cyan-400');
-    coreLabel.textContent = 'Mantén presionado para hablar';
     statusBadge.textContent = 'Standby';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
   }
@@ -250,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   clearBtn.addEventListener('click', () => {
     confirmedText = '';
-    currentSessionText = '';
     transcriptArea.value = '';
     updateWordCount('');
     showNotification('Memoria reiniciada.');
