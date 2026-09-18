@@ -30,8 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let animationId = null;
   let recognition = null;
   let confirmedText = '';
+  let restartTimeout = null;
 
-  // Redimensionamiento elástico del Canvas con DevicePixelRatio para pantallas Retina / 4K
+  // Adaptación Retina/4K Canvas
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
@@ -43,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isRecording) drawIdleVisualizer();
   }
 
-  // Observer moderno para redibujar en giros de pantalla y cambios de tamaño fluidos
   if (window.ResizeObserver) {
     new ResizeObserver(resizeCanvas).observe(canvas);
   } else {
@@ -51,15 +51,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   resizeCanvas();
 
-  // Compatibilidad universal con Web Speech API
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'es-MX';
+  function updateWordCount(text) {
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
+  }
 
-    recognition.onresult = (event) => {
+  // Inicialización de SpeechRecognition bajo demanda (requisito móvil)
+  function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showNotification('Tu navegador no soporta reconocimiento de voz nativo.');
+      return null;
+    }
+
+    const instance = new SpeechRecognition();
+    instance.continuous = true;
+    instance.interimResults = true;
+    instance.maxAlternatives = 1;
+    instance.lang = 'es-MX';
+
+    instance.onresult = (event) => {
       let interimText = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript;
@@ -74,56 +85,87 @@ document.addEventListener('DOMContentLoaded', () => {
       updateWordCount(transcriptArea.value);
     };
 
-    recognition.onerror = (e) => {
-      console.warn('Reconocimiento de voz:', e.error);
-    };
-
-    recognition.onend = () => {
-      if (isRecording) {
-        try { recognition.start(); } catch (err) {}
+    instance.onerror = (e) => {
+      console.warn('SpeechRecognition Error:', e.error);
+      if (e.error === 'not-allowed') {
+        showNotification('Permiso de micrófono denegado.');
+        stopSession();
       }
     };
+
+    instance.onend = () => {
+      // En Android y Safari el engine finaliza cada pocos segundos; se reconecta con margen de seguridad
+      if (isRecording) {
+        clearTimeout(restartTimeout);
+        restartTimeout = setTimeout(() => {
+          if (isRecording && recognition) {
+            try {
+              recognition.start();
+            } catch (err) {
+              console.debug('Fallo al reanudar stream de voz:', err);
+            }
+          }
+        }, 300);
+      }
+    };
+
+    return instance;
   }
 
-  function updateWordCount(text) {
-    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
-  }
-
-  async function initAudioSystem() {
+  // Inicializa el analizador de audio sin acaparar el driver exclusivo
+  async function initAudioVisualizer() {
     try {
-      microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      // En móviles solicitamos audio sin procesamientos agresivos para no colisionar con SpeechRecognition
+      microphoneStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
+
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
       }
+
       const source = audioCtx.createMediaStreamSource(microphoneStream);
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
+      analyser.fftSize = 64;
       source.connect(analyser);
       dataArray = new Uint8Array(analyser.frequencyBinCount);
       return true;
     } catch (err) {
-      showNotification('Permiso de micrófono no otorgado.');
+      console.warn('No se pudo inicializar visualizador de audio (se continúa solo con transcripción):', err);
       return false;
     }
   }
 
   function stopSession() {
     isRecording = false;
+    clearTimeout(restartTimeout);
+
     if (recognition) {
-      try { recognition.stop(); } catch (e) {}
+      try {
+        recognition.stop();
+      } catch (e) {}
+      recognition = null;
     }
+
     if (microphoneStream) {
       microphoneStream.getTracks().forEach(track => track.stop());
       microphoneStream = null;
     }
+
     if (audioCtx && audioCtx.state !== 'closed') {
-      audioCtx.close();
+      audioCtx.close().catch(() => {});
       audioCtx = null;
     }
+
     if (animationId) {
       cancelAnimationFrame(animationId);
+      animationId = null;
     }
 
     coreTrigger.classList.remove('glass-panel-active');
@@ -140,27 +182,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function startSession() {
-    if (!SpeechRecognition) {
-      showNotification('Navegador sin soporte de voz nativa.');
-      return;
-    }
-
-    const success = await initAudioSystem();
-    if (!success) return;
+    // 1. Instanciamos reconocimiento de voz directamente en la pila del evento de usuario
+    recognition = setupSpeechRecognition();
+    if (!recognition) return;
 
     isRecording = true;
+
+    // 2. Arrancamos primero el reconocimiento de voz nativo
+    try {
+      recognition.start();
+    } catch (e) {
+      console.warn('Error al iniciar recognition:', e);
+    }
+
+    // 3. Inicializamos el canvas visualizador en paralelo
+    await initAudioVisualizer();
+
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
     coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     coreLabel.textContent = 'Escuchando en Vivo';
     statusBadge.textContent = 'En Vivo';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
-
-    try {
-      recognition.start();
-    } catch (e) {
-      console.debug('Recognition activo:', e);
-    }
 
     renderVisualizer();
   }
@@ -184,16 +227,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderVisualizer() {
-    if (!isRecording || !analyser) return;
+    if (!isRecording) return;
 
     animationId = requestAnimationFrame(renderVisualizer);
-    analyser.getByteFrequencyData(dataArray);
 
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i];
+    let sensitivity = 0;
+    if (analyser && dataArray) {
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      sensitivity = (sum / dataArray.length) / 255;
+    } else {
+      // Pulso orgánico simulado si el hardware móvil no permite compartir el stream de audio
+      sensitivity = 0.15 + (Math.sin(Date.now() * 0.005) * 0.1);
     }
-    const sensitivity = (sum / dataArray.length) / 255;
+
     sensVal.textContent = `${(sensitivity * 100).toFixed(1)}%`;
 
     const scaleFactor = 1 + (sensitivity * 0.35);
@@ -205,17 +255,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const height = canvas.height / dpr;
     ctx.clearRect(0, 0, width, height);
 
-    // Cantidad de barras dinámica según ancho de la pantalla
-    const barCount = width < 380 ? 20 : 28;
+    const barCount = width < 380 ? 18 : 26;
     const gap = 3;
     const barWidth = (width / barCount) - gap;
     let x = gap / 2;
 
     for (let i = 0; i < barCount; i++) {
-      const dataIndex = Math.floor((i / barCount) * dataArray.length);
-      const barHeightPercent = dataArray[dataIndex] / 255;
-      const barHeight = Math.max(4, barHeightPercent * (height * 0.75));
+      let barHeightPercent = 0.08;
+      if (dataArray && analyser) {
+        const dataIndex = Math.floor((i / barCount) * dataArray.length);
+        barHeightPercent = dataArray[dataIndex] / 255;
+      } else {
+        barHeightPercent = Math.abs(Math.sin((Date.now() * 0.006) + (i * 0.4))) * sensitivity;
+      }
 
+      const barHeight = Math.max(4, barHeightPercent * (height * 0.75));
       const gradient = ctx.createLinearGradient(0, height, 0, 0);
       gradient.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
       gradient.addColorStop(0.7, 'rgba(121, 40, 202, 0.8)');
