@@ -25,10 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRecording = false;
   let recognition = null;
   let confirmedText = '';
+  let currentSessionText = '';
   let smoothBars = [];
-  let speechActivity = 0.15; // Nivel base de actividad simulada
+  let speechActivity = 0.15; 
 
-  // Adaptación Retina/4K Canvas
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
@@ -51,6 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
     wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
   }
 
+  // Sincronizar memoria interna si el usuario edita el texto a mano
+  transcriptArea.addEventListener('input', (e) => {
+    confirmedText = e.target.value + ' ';
+    currentSessionText = ''; 
+    updateWordCount(e.target.value);
+  });
+
   function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -64,25 +71,33 @@ document.addEventListener('DOMContentLoaded', () => {
     instance.maxAlternatives = 1;
     instance.lang = 'es-MX';
 
-    // Eventos para alimentar el visualizador orgánico sin bloquear el hardware del micrófono
     instance.onsoundstart = () => { speechActivity = 0.4; };
     instance.onspeechstart = () => { speechActivity = 0.7; };
     instance.onsoundend = () => { speechActivity = 0.15; };
 
     instance.onresult = (event) => {
-      speechActivity = 1.0; // Pico visual máximo al detectar palabras
-      let interimText = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          confirmedText += transcript + ' ';
-        } else {
-          interimText += transcript;
-        }
+      speechActivity = 1.0; 
+      let sessionText = '';
+
+      // Reconstruir la oración completa de la sesión actual sin confiar en el resultIndex del navegador (evita duplicados en Android)
+      for (let i = 0; i < event.results.length; ++i) {
+        sessionText += event.results[i][0].transcript;
       }
-      transcriptArea.value = confirmedText + interimText;
+
+      currentSessionText = sessionText.replace(/\s+/g, ' ').trim();
+
+      // Mostrar texto confirmado + lo que se está hablando actualmente
+      transcriptArea.value = (confirmedText + ' ' + currentSessionText).trim();
       transcriptArea.scrollTop = transcriptArea.scrollHeight;
       updateWordCount(transcriptArea.value);
+    };
+
+    instance.onend = () => {
+      // Consolidar la oración en la memoria permanente solo cuando el motor finaliza la escucha
+      if (currentSessionText) {
+        confirmedText = (confirmedText + ' ' + currentSessionText).trim() + ' ';
+        currentSessionText = '';
+      }
     };
 
     instance.onerror = (e) => {
@@ -98,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function startSession() {
     if (isRecording) return;
     isRecording = true;
-    speechActivity = 0.3; // Impulso visual inicial al presionar
+    speechActivity = 0.3; 
 
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
@@ -113,9 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recognition) {
       try {
         recognition.start();
-      } catch (e) {
-        console.warn('El motor de voz ya estaba activo o falló:', e);
-      }
+      } catch (e) {}
     }
   }
 
@@ -137,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
   }
 
-  // Bucle de renderizado continuo y fluido
   function loop() {
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width / dpr;
@@ -149,10 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const barWidth = (width / barCount) - gap;
 
     if (isRecording) {
-      // Decaimiento orgánico de la actividad para que no se quede estático
       speechActivity = Math.max(0.15, speechActivity - 0.015);
-      
-      // Sensibilidad visual combinando los eventos del micrófono y una onda sinusoidal
       let sensitivity = speechActivity + (Math.sin(Date.now() * 0.008) * 0.1);
 
       sensVal.textContent = `${(Math.min(100, sensitivity * 100)).toFixed(1)}%`;
@@ -161,17 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let x = gap / 2;
       for (let i = 0; i < barCount; i++) {
-        // Base de la onda
         let rawTarget = Math.abs(Math.sin((Date.now() * 0.005) + (i * 0.4))) * sensitivity;
         
-        // Añadir picos caóticos si hay actividad de voz fuerte para simular decibelios
         if (speechActivity > 0.4) {
           rawTarget += Math.random() * (speechActivity * 0.6);
         }
         
         rawTarget = Math.min(1, rawTarget);
-
-        // Interpolación lineal (LERP) para transiciones muy suaves
         smoothBars[i] = (smoothBars[i] || 0) * 0.75 + rawTarget * 0.25;
 
         const barHeight = Math.max(4, smoothBars[i] * (height * 0.8));
@@ -189,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         x += barWidth + gap;
       }
     } else {
-      // Estado de reposo animado
       sensVal.textContent = '0.0%';
       ambientGlow.style.transform = 'scale(1)';
       ambientGlow.style.opacity = '0.25';
@@ -206,14 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.stroke();
 
       for (let i = 0; i < barCount; i++) {
-        smoothBars[i] = (smoothBars[i] || 0) * 0.8; // Apagar barras suavemente
+        smoothBars[i] = (smoothBars[i] || 0) * 0.8; 
       }
     }
 
     requestAnimationFrame(loop);
   }
 
-  // Eventos Push-to-Talk nativos (Walkie-Talkie)
   coreTrigger.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     coreTrigger.setPointerCapture?.(e.pointerId);
@@ -229,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     stopSession();
   });
 
-  // Evita que aparezca el menú de "guardar imagen/texto" al mantener presionado en móviles
   coreTrigger.addEventListener('contextmenu', (e) => e.preventDefault());
 
   copyBtn.addEventListener('click', () => {
@@ -248,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   clearBtn.addEventListener('click', () => {
     confirmedText = '';
+    currentSessionText = '';
     transcriptArea.value = '';
     updateWordCount('');
     showNotification('Memoria reiniciada.');
