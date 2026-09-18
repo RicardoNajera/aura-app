@@ -3,262 +3,267 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>AURA RADIO - PWA</title>
+  <title>Aura // Interface</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#121820">
+  <meta name="theme-color" content="#030712">
   <style>
     :root {
-      --bg-color: #0b0f14;
-      --card-bg: #161f28;
-      --accent-green: #00ff88;
-      --accent-green-glow: rgba(0, 255, 136, 0.4);
-      --radio-red: #ff3355;
-      --radio-red-glow: rgba(255, 51, 85, 0.5);
-      --lcd-bg: #05130e;
-      --text-color: #e0f0eb;
-      --subtext: #6b827a;
+      --bg-base: #030712;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(56, 189, 248, 0.15);
+      --glass-border-active: rgba(56, 189, 248, 0.5);
+      --electric-blue: #38bdf8;
+      --deep-glow: rgba(56, 189, 248, 0.25);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
       user-select: none;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(14, 116, 144, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(3, 105, 161, 0.1) 0%, transparent 40%);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 15px;
-    }
-
-    .radio-container {
-      width: 100%;
-      max-width: 420px;
-      background: var(--card-bg);
-      border: 2px solid #243240;
-      border-radius: 28px;
       padding: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(255, 255, 255, 0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-    }
-
-    /* Header Radio */
-    .radio-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 5px;
-    }
-
-    .brand {
-      font-weight: 900;
-      letter-spacing: 2px;
-      font-size: 1.1rem;
-      color: var(--text-color);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #445566;
-    }
-
-    .brand-dot.active {
-      background: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
-      animation: pulse-green 1.5s infinite;
-    }
-
-    .status-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: #0f1720;
-      border: 1px solid #223344;
-      color: var(--subtext);
-      text-transform: uppercase;
-    }
-
-    .status-badge.transmitting {
-      color: var(--radio-red);
-      border-color: var(--radio-red);
-      box-shadow: 0 0 8px var(--radio-red-glow);
-    }
-
-    /* Pantalla LCD */
-    .lcd-display {
-      background: var(--lcd-bg);
-      border: 2px solid #102d23;
-      border-radius: 16px;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
-      position: relative;
       overflow: hidden;
     }
 
-    .lcd-top-bar {
+    .app-container {
+      width: 100%;
+      max-width: 400px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 32px;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       display: flex;
-      justify-content: space-between;
-      font-family: monospace;
-      font-size: 0.75rem;
-      color: #00aa55;
-      border-bottom: 1px solid #0d382b;
-      padding-bottom: 6px;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
     }
 
-    .transcript-box {
+    /* Barra Superior minimalista */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #475569;
+      transition: all 0.4s ease;
+    }
+
+    .status-dot.active {
+      background: var(--electric-blue);
+      box-shadow: 0 0 12px var(--electric-blue);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .badge.active {
+      color: var(--electric-blue);
+      border-color: rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.08);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Pantalla de Transcripción Estilo Apple Notes */
+    .screen-panel {
+      background: rgba(2, 6, 23, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .transcript-view {
       width: 100%;
-      height: 220px;
+      height: 210px;
       background: transparent;
       border: none;
-      color: var(--accent-green);
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 1rem;
-      line-height: 1.5;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      line-height: 1.6;
       resize: none;
       outline: none;
       user-select: text;
     }
 
-    .transcript-box::placeholder {
-      color: #1a5540;
+    .transcript-view::placeholder {
+      color: #334155;
     }
 
-    /* Controles de Radio */
-    .controls {
+    /* Controles Centrales */
+    .control-center {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
-      margin-top: 5px;
+      gap: 16px;
     }
 
-    .ptt-button {
-      width: 100px;
-      height: 100px;
+    .mic-trigger {
+      width: 88px;
+      height: 88px;
       border-radius: 50%;
-      background: linear-gradient(145deg, #1c2836, #121a24);
-      border: 4px solid #2a3c50;
-      color: var(--text-color);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(14, 116, 144, 0.25));
+      border: 1px solid var(--glass-border-active);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 4px;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.1);
-      transition: all 0.2s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
 
-    .ptt-button:active {
-      transform: scale(0.95);
+    .mic-trigger:active {
+      transform: scale(0.94);
     }
 
-    .ptt-button.recording {
-      border-color: var(--radio-red);
-      background: linear-gradient(145deg, #3d0a14, #21050a);
-      box-shadow: 0 0 30px var(--radio-red-glow), inset 0 2px 3px rgba(255,255,255,0.2);
+    .mic-trigger.recording {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(2, 132, 199, 0.5));
+      border-color: var(--electric-blue);
+      box-shadow: 0 0 35px var(--deep-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      animation: apple-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
-    .ptt-icon {
-      font-size: 2rem;
+    .mic-icon {
+      font-size: 1.6rem;
     }
 
-    .ptt-label {
-      font-size: 0.65rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: var(--subtext);
+    .mic-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
     }
 
-    .ptt-button.recording .ptt-label {
-      color: var(--radio-red);
+    .mic-trigger.recording .mic-label {
+      color: var(--text-main);
     }
 
-    .action-row {
+    /* Acciones Secundarias estilo Apple Glass */
+    .actions-grid {
       display: flex;
       width: 100%;
       gap: 10px;
     }
 
-    .btn-secondary {
+    .btn-action {
       flex: 1;
       padding: 12px;
-      background: #111a24;
-      border: 1px solid #223344;
-      border-radius: 12px;
-      color: var(--text-color);
-      font-weight: 600;
-      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      color: var(--text-main);
+      font-weight: 500;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 6px;
     }
 
-    .btn-secondary:hover {
-      background: #1a2736;
+    .btn-action:hover {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.2);
     }
 
-    @keyframes pulse-green {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
+    @keyframes apple-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4), 0 0 30px var(--deep-glow); }
+      70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0), 0 0 30px var(--deep-glow); }
+      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 0 30px var(--deep-glow); }
     }
   </style>
 </head>
 <body>
 
-  <div class="radio-container">
+  <div class="app-container">
     <!-- Header -->
-    <div class="radio-header">
-      <div class="brand">
-        <div class="brand-dot" id="led-indicator"></div>
-        AURA RX-1
+    <div class="header">
+      <div class="logo-area">
+        <div class="status-dot" id="led-indicator"></div>
+        AURA OS
       </div>
-      <div class="status-badge" id="status-badge">EN ESPERA</div>
+      <div class="badge" id="status-badge">STANDBY</div>
     </div>
 
-    <!-- Pantalla LCD de Transcripción -->
-    <div class="lcd-display">
-      <div class="lcd-top-bar">
-        <span>FREQ: 108.0 MHz</span>
-        <span id="word-count">0 PALABRAS</span>
+    <!-- Pantalla de Transcripción Fluida -->
+    <div class="screen-panel">
+      <div class="screen-header">
+        <span>AUDIO STREAM LIVE</span>
+        <span id="word-counter">0 PALABRAS</span>
       </div>
-      <textarea id="transcript" class="transcript-box" readonly placeholder="Presiona transmisión para comenzar a escuchar de forma continua..."></textarea>
+      <textarea id="transcript" class="transcript-view" readonly placeholder="Inicia la transmisión para capturar texto en tiempo real..."></textarea>
     </div>
 
-    <!-- Botones y Micrófono -->
-    <div class="controls">
-      <button class="ptt-button" id="mic-btn">
-        <span class="ptt-icon" id="mic-icon">🎙️</span>
-        <span class="ptt-label" id="mic-label">TRANSMITIR</span>
+    <!-- Controles -->
+    <div class="control-center">
+      <button class="mic-trigger" id="mic-btn">
+        <span class="mic-icon" id="mic-icon">🎙️</span>
+        <span class="mic-label" id="mic-label">RECORD</span>
       </button>
 
-      <div class="action-row">
-        <button class="btn-secondary" id="copy-btn">📋 Copiar</button>
-        <button class="btn-secondary" id="clear-btn">🗑️ Limpiar</button>
+      <div class="actions-grid">
+        <button class="btn-action" id="copy-btn">📋 Copiar</button>
+        <button class="btn-action" id="clear-btn">✨ Limpiar</button>
       </div>
     </div>
   </div>

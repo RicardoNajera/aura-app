@@ -2,85 +2,79 @@
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW activo:', reg.scope))
-      .catch(err => console.error('Error SW:', err));
+      .then(reg => console.log('Aura SW activo:', reg.scope))
+      .catch(err => console.error('Error en SW:', err));
   });
 }
 
-// Variables Globales
+// Variables del motor de voz
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let isListening = false;
 let finalTranscript = '';
 
-// Elementos de la UI
+// Elementos UI
 const micBtn = document.getElementById('mic-btn');
 const micIcon = document.getElementById('mic-icon');
 const micLabel = document.getElementById('mic-label');
 const statusBadge = document.getElementById('status-badge');
 const ledIndicator = document.getElementById('led-indicator');
 const transcriptBox = document.getElementById('transcript');
-const wordCountDisplay = document.getElementById('word-count');
+const wordCounter = document.getElementById('word-counter');
 const copyBtn = document.getElementById('copy-btn');
 const clearBtn = document.getElementById('clear-btn');
 
-// Inicializar Reconocimiento de Voz
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
-  recognition.continuous = true;       // Mantiene escuchando sin parar
-  recognition.interimResults = true;    // Transcribe en tiempo real conforme hablas
-  recognition.lang = 'es-MX';           // Español Latino
+  recognition.continuous = true;       // Escucha ininterrumpida
+  recognition.interimResults = true;    // Transcripción instantánea palabra a palabra
+  recognition.lang = 'es-MX';
 
-  // Captura de audio e inserción continua
   recognition.onresult = (event) => {
     let interimTranscript = '';
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcriptSegment = event.results[i][0].transcript;
+      const segment = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
-        finalTranscript += transcriptSegment + ' ';
+        finalTranscript += segment + ' ';
       } else {
-        interimTranscript += transcriptSegment;
+        interimTranscript += segment;
       }
     }
 
-    // Renderizar en la pantalla LCD
-    const currentText = finalTranscript + interimTranscript;
-    transcriptBox.value = currentText;
+    const currentFullText = finalTranscript + interimTranscript;
+    transcriptBox.value = currentFullText;
     
-    // Auto-scroll hacia abajo
+    // Auto-scroll fluido al final
     transcriptBox.scrollTop = transcriptBox.scrollHeight;
 
-    // Actualizar contador de palabras
-    const words = currentText.trim().split(/\s+/).filter(w => w.length > 0);
-    wordCountDisplay.textContent = `${words.length} PALABRAS`;
+    // Conteo de palabras en tiempo real
+    const wordList = currentFullText.trim().split(/\s+/).filter(w => w.length > 0);
+    wordCounter.textContent = `${wordList.length} PALABRAS`;
   };
 
-  // Manejo de cierres involuntarios del navegador (Reinicio Automático Inmediato)
+  // Reconexión automática si el navegador pausa la escucha por silencio
   recognition.onend = () => {
     if (isListening) {
       try {
         recognition.start();
       } catch (e) {
-        console.log('Reinicio de micrófono...', e);
+        console.log('Reiniciando stream...', e);
       }
     } else {
-      setUIState(false);
+      updateUI(false);
     }
   };
 
   recognition.onerror = (event) => {
-    console.warn('Evento de voz:', event.error);
-    if (event.error === 'network') {
-      statusBadge.textContent = 'ERROR RED';
-    }
+    console.warn('Alerta de voz:', event.error);
   };
 
 } else {
-  alert('Tu navegador no soporta Reconocimiento de Voz. Intenta en Chrome o Safari.');
+  alert('Tu navegador no soporta API de Voz.');
 }
 
-// Alternar Estado de Grabación
+// Control de Activación
 function toggleListening() {
   if (!recognition) return;
 
@@ -88,32 +82,32 @@ function toggleListening() {
     try {
       recognition.start();
       isListening = true;
-      setUIState(true);
+      updateUI(true);
     } catch (err) {
-      console.error("Error al iniciar:", err);
+      console.error("Error al arrancar:", err);
     }
   } else {
     isListening = false;
     recognition.stop();
-    setUIState(false);
+    updateUI(false);
   }
 }
 
-// Control Visual del Estado
-function setUIState(active) {
+// Cambio de Estados Visuales Apple Glass
+function updateUI(active) {
   if (active) {
     micBtn.classList.add('recording');
     micIcon.textContent = '⏹️';
-    micLabel.textContent = 'DETENER';
-    statusBadge.textContent = 'TRANSMITIENDO';
-    statusBadge.classList.add('transmitting');
+    micLabel.textContent = 'STOP';
+    statusBadge.textContent = 'LIVE';
+    statusBadge.classList.add('active');
     ledIndicator.classList.add('active');
   } else {
     micBtn.classList.remove('recording');
     micIcon.textContent = '🎙️';
-    micLabel.textContent = 'TRANSMITIR';
-    statusBadge.textContent = 'EN ESPERA';
-    statusBadge.classList.remove('transmitting');
+    micLabel.textContent = 'RECORD';
+    statusBadge.textContent = 'STANDBY';
+    statusBadge.classList.remove('active');
     ledIndicator.classList.remove('active');
   }
 }
@@ -121,19 +115,17 @@ function setUIState(active) {
 // Event Listeners
 micBtn.addEventListener('click', toggleListening);
 
-// Botón Copiar Texto
 copyBtn.addEventListener('click', () => {
   if (!transcriptBox.value) return;
   navigator.clipboard.writeText(transcriptBox.value).then(() => {
-    const prevText = copyBtn.textContent;
-    copyBtn.textContent = '✅ Copiado!';
-    setTimeout(() => copyBtn.textContent = prevText, 1500);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = '✓ Copiado';
+    setTimeout(() => copyBtn.textContent = originalText, 1500);
   });
 });
 
-// Botón Limpiar Pantalla
 clearBtn.addEventListener('click', () => {
   finalTranscript = '';
   transcriptBox.value = '';
-  wordCountDisplay.textContent = '0 PALABRAS';
+  wordCounter.textContent = '0 PALABRAS';
 });
