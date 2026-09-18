@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let animationId = null;
   let recognition = null;
   let confirmedText = '';
-  let restartTimeout = null;
+  let smoothBars = [];
 
   // Adaptación Retina/4K Canvas
   function resizeCanvas() {
@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height = rect.height * dpr;
     ctx.resetTransform?.() || ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
-    if (!isRecording) drawIdleVisualizer();
   }
 
   if (window.ResizeObserver) {
@@ -56,11 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     wordCounter.textContent = `${words} Palabra${words === 1 ? '' : 's'}`;
   }
 
-  // Inicialización de SpeechRecognition bajo demanda (requisito móvil)
   function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      showNotification('Tu navegador no soporta reconocimiento de voz nativo.');
+      showNotification('Navegador sin soporte de voz nativo.');
       return null;
     }
 
@@ -86,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     instance.onerror = (e) => {
-      console.warn('SpeechRecognition Error:', e.error);
       if (e.error === 'not-allowed') {
         showNotification('Permiso de micrófono denegado.');
         stopSession();
@@ -94,162 +91,84 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     instance.onend = () => {
-      // En Android y Safari el engine finaliza cada pocos segundos; se reconecta con margen de seguridad
       if (isRecording) {
-        clearTimeout(restartTimeout);
-        restartTimeout = setTimeout(() => {
-          if (isRecording && recognition) {
-            try {
-              recognition.start();
-            } catch (err) {
-              console.debug('Fallo al reanudar stream de voz:', err);
-            }
-          }
-        }, 300);
+        try {
+          recognition.start();
+        } catch (err) {}
       }
     };
 
     return instance;
   }
 
-  // Inicializa el analizador de audio sin acaparar el driver exclusivo
-  async function initAudioVisualizer() {
-    try {
-      // En móviles solicitamos audio sin procesamientos agresivos para no colisionar con SpeechRecognition
-      microphoneStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        },
-        video: false
-      });
-
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
+  async function ensureAudioContext() {
+    if (!audioCtx) {
+      try {
+        microphoneStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          video: false
+        });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(microphoneStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        analyser.smoothingTimeConstant = 0.8;
+        source.connect(analyser);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+      } catch (err) {
+        console.warn('AudioContext no disponible inmediatamente:', err);
       }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+  }
 
-      const source = audioCtx.createMediaStreamSource(microphoneStream);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      source.connect(analyser);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-      return true;
-    } catch (err) {
-      console.warn('No se pudo inicializar visualizador de audio (se continúa solo con transcripción):', err);
-      return false;
+  function startSession() {
+    if (isRecording) return;
+    isRecording = true;
+
+    // Feedback visual instantáneo (0ms lag)
+    coreTrigger.classList.add('glass-panel-active');
+    coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
+    coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
+    coreLabel.textContent = 'Transmitiendo... (Suelta para enviar)';
+    statusBadge.textContent = 'En Vivo';
+    statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
+
+    // Inicializar canal de audio y reconocimiento
+    ensureAudioContext();
+
+    if (!recognition) {
+      recognition = setupSpeechRecognition();
+    }
+    if (recognition) {
+      try {
+        recognition.start();
+      } catch (e) {}
     }
   }
 
   function stopSession() {
+    if (!isRecording) return;
     isRecording = false;
-    clearTimeout(restartTimeout);
 
     if (recognition) {
       try {
         recognition.stop();
       } catch (e) {}
-      recognition = null;
-    }
-
-    if (microphoneStream) {
-      microphoneStream.getTracks().forEach(track => track.stop());
-      microphoneStream = null;
-    }
-
-    if (audioCtx && audioCtx.state !== 'closed') {
-      audioCtx.close().catch(() => {});
-      audioCtx = null;
-    }
-
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-      animationId = null;
     }
 
     coreTrigger.classList.remove('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     coreIconContainer.classList.add('bg-cyan-950/80', 'text-cyan-400');
-    coreLabel.textContent = 'Click para Iniciar';
+    coreLabel.textContent = 'Mantén presionado para hablar';
     statusBadge.textContent = 'Standby';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
-    sensVal.textContent = '0.0%';
-    ambientGlow.style.transform = 'scale(1)';
-    ambientGlow.style.opacity = '0.25';
-
-    drawIdleVisualizer();
   }
 
-  async function startSession() {
-    // 1. Instanciamos reconocimiento de voz directamente en la pila del evento de usuario
-    recognition = setupSpeechRecognition();
-    if (!recognition) return;
-
-    isRecording = true;
-
-    // 2. Arrancamos primero el reconocimiento de voz nativo
-    try {
-      recognition.start();
-    } catch (e) {
-      console.warn('Error al iniciar recognition:', e);
-    }
-
-    // 3. Inicializamos el canvas visualizador en paralelo
-    await initAudioVisualizer();
-
-    coreTrigger.classList.add('glass-panel-active');
-    coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
-    coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
-    coreLabel.textContent = 'Escuchando en Vivo';
-    statusBadge.textContent = 'En Vivo';
-    statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
-
-    renderVisualizer();
-  }
-
-  function drawIdleVisualizer() {
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.width / dpr;
-    const height = canvas.height / dpr;
-    ctx.clearRect(0, 0, width, height);
-
-    const centerY = height / 2;
-    ctx.beginPath();
-    ctx.moveTo(0, centerY);
-    for (let x = 0; x < width; x += 10) {
-      const y = centerY + Math.sin(x * 0.05 + Date.now() * 0.003) * 3;
-      ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  function renderVisualizer() {
-    if (!isRecording) return;
-
-    animationId = requestAnimationFrame(renderVisualizer);
-
-    let sensitivity = 0;
-    if (analyser && dataArray) {
-      analyser.getByteFrequencyData(dataArray);
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-      }
-      sensitivity = (sum / dataArray.length) / 255;
-    } else {
-      // Pulso orgánico simulado si el hardware móvil no permite compartir el stream de audio
-      sensitivity = 0.15 + (Math.sin(Date.now() * 0.005) * 0.1);
-    }
-
-    sensVal.textContent = `${(sensitivity * 100).toFixed(1)}%`;
-
-    const scaleFactor = 1 + (sensitivity * 0.35);
-    ambientGlow.style.transform = `scale(${scaleFactor})`;
-    ambientGlow.style.opacity = 0.2 + (sensitivity * 0.6);
-
+  // Bucle de renderizado continuo y fluido (evita congelamiento al presionar)
+  function loop() {
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width / dpr;
     const height = canvas.height / dpr;
@@ -258,40 +177,93 @@ document.addEventListener('DOMContentLoaded', () => {
     const barCount = width < 380 ? 18 : 26;
     const gap = 3;
     const barWidth = (width / barCount) - gap;
-    let x = gap / 2;
+    let sensitivity = 0;
 
-    for (let i = 0; i < barCount; i++) {
-      let barHeightPercent = 0.08;
-      if (dataArray && analyser) {
-        const dataIndex = Math.floor((i / barCount) * dataArray.length);
-        barHeightPercent = dataArray[dataIndex] / 255;
+    if (isRecording) {
+      if (analyser && dataArray) {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        sensitivity = (sum / dataArray.length) / 255;
       } else {
-        barHeightPercent = Math.abs(Math.sin((Date.now() * 0.006) + (i * 0.4))) * sensitivity;
+        sensitivity = 0.2 + (Math.sin(Date.now() * 0.008) * 0.1);
       }
 
-      const barHeight = Math.max(4, barHeightPercent * (height * 0.75));
-      const gradient = ctx.createLinearGradient(0, height, 0, 0);
-      gradient.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
-      gradient.addColorStop(0.7, 'rgba(121, 40, 202, 0.8)');
-      gradient.addColorStop(1, 'rgba(255, 0, 127, 0.95)');
+      sensVal.textContent = `${(sensitivity * 100).toFixed(1)}%`;
+      ambientGlow.style.transform = `scale(${1 + (sensitivity * 0.3)})`;
+      ambientGlow.style.opacity = `${0.3 + (sensitivity * 0.7)}`;
 
-      ctx.fillStyle = gradient;
-      const y = (height - barHeight) / 2;
+      let x = gap / 2;
+      for (let i = 0; i < barCount; i++) {
+        let rawTarget = 0.05;
+        if (analyser && dataArray) {
+          const idx = Math.floor((i / barCount) * dataArray.length);
+          rawTarget = dataArray[idx] / 255;
+        } else {
+          rawTarget = Math.abs(Math.sin((Date.now() * 0.006) + (i * 0.4))) * sensitivity;
+        }
+
+        // Interpolación lineal (LERP) para suavizar saltos
+        smoothBars[i] = (smoothBars[i] || 0) * 0.75 + rawTarget * 0.25;
+
+        const barHeight = Math.max(4, smoothBars[i] * (height * 0.8));
+        const gradient = ctx.createLinearGradient(0, height, 0, 0);
+        gradient.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
+        gradient.addColorStop(0.7, 'rgba(121, 40, 202, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 0, 127, 0.95)');
+
+        ctx.fillStyle = gradient;
+        const y = (height - barHeight) / 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, barHeight, 3);
+        ctx.fill();
+
+        x += barWidth + gap;
+      }
+    } else {
+      // Estado reposo animado
+      sensVal.textContent = '0.0%';
+      ambientGlow.style.transform = 'scale(1)';
+      ambientGlow.style.opacity = '0.25';
+
+      const centerY = height / 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, barWidth, barHeight, 3);
-      ctx.fill();
+      ctx.moveTo(0, centerY);
+      for (let x = 0; x < width; x += 10) {
+        const y = centerY + Math.sin(x * 0.05 + Date.now() * 0.003) * 3;
+        ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-      x += barWidth + gap;
+      // Reset paulatino de amplitudes
+      for (let i = 0; i < barCount; i++) {
+        smoothBars[i] = (smoothBars[i] || 0) * 0.8;
+      }
     }
+
+    requestAnimationFrame(loop);
   }
 
-  coreTrigger.addEventListener('click', () => {
-    if (!isRecording) {
-      startSession();
-    } else {
-      stopSession();
-    }
+  // Comportamiento estilo Walkie-Talkie (Push-to-Talk)
+  coreTrigger.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    coreTrigger.setPointerCapture?.(e.pointerId);
+    startSession();
   });
+
+  coreTrigger.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    stopSession();
+  });
+
+  coreTrigger.addEventListener('pointercancel', (e) => {
+    stopSession();
+  });
+
+  // Evitar menú contextual táctil en móviles al dejar presionado
+  coreTrigger.addEventListener('contextmenu', (e) => e.preventDefault());
 
   copyBtn.addEventListener('click', () => {
     const textToCopy = transcriptArea.value.trim();
@@ -331,5 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000);
   }
 
-  drawIdleVisualizer();
+  coreLabel.textContent = 'Mantén presionado para hablar';
+  loop();
 });
