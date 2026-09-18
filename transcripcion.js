@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let confirmedText = '';
   let smoothBars = [];
   let speechActivity = 0.15; 
-  let stopTimeout = null; // Controla el tiempo extra de grabación
+  let stopTimeout = null; 
+  let sfxCtx = null; // Contexto de audio para los efectos de sonido
 
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
@@ -56,6 +57,52 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWordCount(e.target.value);
   });
 
+  // Generador de Sonidos Walkie-Talkie (Oscilador Sintético)
+  function playRadioSfx(type) {
+    if (!sfxCtx) {
+      sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (sfxCtx.state === 'suspended') sfxCtx.resume();
+
+    const osc = sfxCtx.createOscillator();
+    const gain = sfxCtx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(sfxCtx.destination);
+    
+    const now = sfxCtx.currentTime;
+    // Onda cuadrada para un sonido más electrónico y retro (tipo radio)
+    osc.type = 'square'; 
+
+    if (type === 'start') {
+      // Doble bip agudo de inicio
+      osc.frequency.setValueAtTime(1200, now);
+      
+      // Primer bip
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.01);
+      gain.gain.linearRampToValueAtTime(0, now + 0.05);
+      
+      // Segundo bip
+      gain.gain.setValueAtTime(0, now + 0.08);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.09);
+      gain.gain.linearRampToValueAtTime(0, now + 0.13);
+      
+      osc.start(now);
+      osc.stop(now + 0.13);
+    } else if (type === 'end') {
+      // Un solo bip grave de cierre
+      osc.frequency.setValueAtTime(800, now);
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      
+      osc.start(now);
+      osc.stop(now + 0.15);
+    }
+  }
+
   function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -69,9 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     instance.maxAlternatives = 1;
     instance.lang = 'es-MX';
 
-    // Evento clave: Se dispara solo cuando Android REALMENTE empieza a escuchar
     instance.onstart = () => {
-      if (navigator.vibrate) navigator.vibrate(50); // Pequeña vibración de confirmación
+      if (navigator.vibrate) navigator.vibrate(50);
       if (isRecording) {
         coreLabel.textContent = '¡Habla ahora! (Suelta al terminar)';
       }
@@ -116,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startSession() {
-    // Si había un apagado programado, lo cancelamos
     if (stopTimeout) {
       clearTimeout(stopTimeout);
       stopTimeout = null;
@@ -126,11 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
     isRecording = true;
     speechActivity = 0.3; 
 
+    // Efecto de sonido de encendido de radio
+    playRadioSfx('start');
+
     coreTrigger.classList.add('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-950/80', 'text-cyan-400');
     coreIconContainer.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     
-    // Estado intermedio mientras el hardware despierta
     coreLabel.textContent = 'Iniciando micro...';
     statusBadge.textContent = 'En Vivo';
     statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-ping';
@@ -145,23 +192,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Se llama al soltar el botón
   function releaseSession() {
     if (!isRecording) return;
     
-    // Cambiamos la interfaz de inmediato para que sepas que ya soltaste
+    // Efecto de sonido de apagado de radio
+    playRadioSfx('end');
+
     coreTrigger.classList.remove('glass-panel-active');
     coreIconContainer.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-[0_0_30px_rgba(0,240,255,0.8)]');
     coreIconContainer.classList.add('bg-cyan-950/80', 'text-cyan-400');
     coreLabel.textContent = 'Procesando texto...';
 
-    // Pero damos 800ms de gracia al micrófono antes de cortarlo
     stopTimeout = setTimeout(() => {
       forceStopSession();
     }, 800);
   }
 
-  // Apaga realmente el motor de reconocimiento
   function forceStopSession() {
     isRecording = false;
     if (recognition) {
