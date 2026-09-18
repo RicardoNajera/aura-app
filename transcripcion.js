@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let smoothBars = [];
   let speechActivity = 0.15; 
   let stopTimeout = null; 
-  let sfxCtx = null; // Contexto de audio para los efectos de sonido
+  let sfxCtx = null; 
 
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWordCount(e.target.value);
   });
 
-  // Generador de Sonidos Walkie-Talkie (Oscilador Sintético)
   function playRadioSfx(type) {
     if (!sfxCtx) {
       sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -71,19 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     gain.connect(sfxCtx.destination);
     
     const now = sfxCtx.currentTime;
-    // Onda cuadrada para un sonido más electrónico y retro (tipo radio)
     osc.type = 'square'; 
 
     if (type === 'start') {
-      // Doble bip agudo de inicio
       osc.frequency.setValueAtTime(1200, now);
       
-      // Primer bip
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.05, now + 0.01);
       gain.gain.linearRampToValueAtTime(0, now + 0.05);
       
-      // Segundo bip
       gain.gain.setValueAtTime(0, now + 0.08);
       gain.gain.linearRampToValueAtTime(0.05, now + 0.09);
       gain.gain.linearRampToValueAtTime(0, now + 0.13);
@@ -91,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
       osc.start(now);
       osc.stop(now + 0.13);
     } else if (type === 'end') {
-      // Un solo bip grave de cierre
       osc.frequency.setValueAtTime(800, now);
       
       gain.gain.setValueAtTime(0, now);
@@ -136,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (finalSegment.trim()) {
+        // Asegura que las frases separadas por pausas de silencio se unan correctamente
         confirmedText = (confirmedText + ' ' + finalSegment.trim()).trim() + ' ';
         transcriptArea.value = confirmedText.trim();
         transcriptArea.scrollTop = transcriptArea.scrollHeight;
@@ -144,7 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     instance.onend = () => {
-      if (!isRecording) {
+      // Si el motor se apagó por silencio pero sigues presionando el botón
+      if (isRecording) {
+        // Reconexión automática invisible
+        setTimeout(() => {
+          if (isRecording && recognition) {
+            try {
+              recognition.start();
+            } catch (err) {}
+          }
+        }, 50);
+      } else {
+        // El motor se apagó porque tú soltaste el botón
         coreLabel.textContent = 'Mantén presionado para hablar';
         statusBadge.textContent = 'Standby';
         statusDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500';
@@ -155,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.error === 'not-allowed') {
         showNotification('Permiso de micrófono denegado.');
         forceStopSession();
+      } else if (e.error === 'no-speech' && isRecording) {
+        // Si lanza error por falta de voz, ignorarlo y dejar que onend reinicie
+        console.debug('Silencio prolongado detectado.');
       }
     };
 
@@ -171,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     isRecording = true;
     speechActivity = 0.3; 
 
-    // Efecto de sonido de encendido de radio
     playRadioSfx('start');
 
     coreTrigger.classList.add('glass-panel-active');
@@ -195,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function releaseSession() {
     if (!isRecording) return;
     
-    // Efecto de sonido de apagado de radio
     playRadioSfx('end');
 
     coreTrigger.classList.remove('glass-panel-active');
