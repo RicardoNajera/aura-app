@@ -25,6 +25,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
@@ -57,7 +58,6 @@
       position: relative;
     }
 
-    /* Barra Superior minimalista */
     .header {
       display: flex;
       justify-content: space-between;
@@ -70,7 +70,6 @@
       gap: 8px;
       font-weight: 600;
       font-size: 0.95rem;
-      letter-spacing: -0.01em;
       color: var(--text-main);
     }
 
@@ -106,7 +105,6 @@
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
     }
 
-    /* Pantalla de Transcripción Estilo Apple Notes */
     .screen-panel {
       background: rgba(2, 6, 23, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.04);
@@ -115,7 +113,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      position: relative;
     }
 
     .screen-header {
@@ -138,13 +135,13 @@
       resize: none;
       outline: none;
       user-select: text;
+      -webkit-user-select: text;
     }
 
     .transcript-view::placeholder {
       color: #334155;
     }
 
-    /* Controles Centrales */
     .control-center {
       display: flex;
       flex-direction: column;
@@ -166,8 +163,8 @@
       gap: 4px;
       cursor: pointer;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
+      transition: transform 0.1s ease;
+      touch-action: manipulation;
     }
 
     .mic-trigger:active {
@@ -197,7 +194,6 @@
       color: var(--text-main);
     }
 
-    /* Acciones Secundarias estilo Apple Glass */
     .actions-grid {
       display: flex;
       width: 100%;
@@ -236,7 +232,6 @@
 <body>
 
   <div class="app-container">
-    <!-- Header -->
     <div class="header">
       <div class="logo-area">
         <div class="status-dot" id="led-indicator"></div>
@@ -245,20 +240,19 @@
       <div class="badge" id="status-badge">STANDBY</div>
     </div>
 
-    <!-- Pantalla de Transcripción Fluida -->
     <div class="screen-panel">
       <div class="screen-header">
         <span>AUDIO STREAM LIVE</span>
         <span id="word-counter">0 PALABRAS</span>
       </div>
-      <textarea id="transcript" class="transcript-view" readonly placeholder="Inicia la transmisión para capturar texto en tiempo real..."></textarea>
+      <textarea id="transcript" class="transcript-view" readonly placeholder="Mantén presionado RECORD para hablar..."></textarea>
     </div>
 
-    <!-- Controles -->
     <div class="control-center">
+      <!-- Botón configurado para Mantener Presionado (PTT) -->
       <button class="mic-trigger" id="mic-btn">
         <span class="mic-icon" id="mic-icon">🎙️</span>
-        <span class="mic-label" id="mic-label">RECORD</span>
+        <span class="mic-label" id="mic-label">HOLD</span>
       </button>
 
       <div class="actions-grid">

@@ -7,13 +7,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Variables del motor de voz
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
-let isListening = false;
-let finalTranscript = '';
+let isHolding = false;
+let sessionTranscript = '';
 
-// Elementos UI
 const micBtn = document.getElementById('mic-btn');
 const micIcon = document.getElementById('mic-icon');
 const micLabel = document.getElementById('mic-label');
@@ -26,95 +24,119 @@ const clearBtn = document.getElementById('clear-btn');
 
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
-  recognition.continuous = true;       // Escucha ininterrumpida
-  recognition.interimResults = true;    // Transcripción instantánea palabra a palabra
+  recognition.continuous = true;
+  recognition.interimResults = true;
   recognition.lang = 'es-MX';
 
   recognition.onresult = (event) => {
-    let interimTranscript = '';
+    let interim = '';
+    let finalChunk = '';
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const segment = event.results[i][0].transcript;
+      const text = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
-        finalTranscript += segment + ' ';
+        finalChunk += text + ' ';
       } else {
-        interimTranscript += segment;
+        interim += text;
       }
     }
 
-    const currentFullText = finalTranscript + interimTranscript;
-    transcriptBox.value = currentFullText;
-    
-    // Auto-scroll fluido al final
+    if (finalChunk) {
+      sessionTranscript += finalChunk;
+    }
+
+    // Texto limpio con saltos de línea normales (sin etiquetas HTML feas)
+    const fullDisplay = sessionTranscript + interim;
+    transcriptBox.value = fullDisplay;
     transcriptBox.scrollTop = transcriptBox.scrollHeight;
 
-    // Conteo de palabras en tiempo real
-    const wordList = currentFullText.trim().split(/\s+/).filter(w => w.length > 0);
-    wordCounter.textContent = `${wordList.length} PALABRAS`;
+    const words = fullDisplay.trim().split(/\s+/).filter(w => w.length > 0);
+    wordCounter.textContent = `${words.length} PALABRAS`;
   };
 
-  // Reconexión automática si el navegador pausa la escucha por silencio
+  recognition.onerror = (event) => {
+    console.warn('Error de voz:', event.error);
+  };
+
   recognition.onend = () => {
-    if (isListening) {
+    // Si el usuario sigue presionando pero el navegador cortó la sesión, reiniciamos automáticamente
+    if (isHolding) {
       try {
         recognition.start();
       } catch (e) {
         console.log('Reiniciando stream...', e);
       }
-    } else {
-      updateUI(false);
     }
   };
-
-  recognition.onerror = (event) => {
-    console.warn('Alerta de voz:', event.error);
-  };
-
 } else {
   alert('Tu navegador no soporta API de Voz.');
 }
 
-// Control de Activación
-function toggleListening() {
-  if (!recognition) return;
+// Funciones para Mantener Presionado (Push-To-Talk / PTT)
+function startListening(e) {
+  e.preventDefault();
+  if (!recognition || isHolding) return;
 
-  if (!isListening) {
-    try {
-      recognition.start();
-      isListening = true;
-      updateUI(true);
-    } catch (err) {
-      console.error("Error al arrancar:", err);
-    }
+  isHolding = true;
+  updateUI(true);
+
+  // Añadir un salto de línea limpio si ya había texto previo para separar transmisiones
+  if (sessionTranscript.trim() !== '') {
+    sessionTranscript += '\n• ';
   } else {
-    isListening = false;
-    recognition.stop();
-    updateUI(false);
+    sessionTranscript = '• ';
+  }
+
+  try {
+    recognition.start();
+  } catch (err) {
+    console.log('Ya estaba activo', err);
   }
 }
 
-// Cambio de Estados Visuales Apple Glass
+function stopListening(e) {
+  e.preventDefault();
+  if (!isHolding) return;
+
+  isHolding = false;
+  updateUI(false);
+
+  try {
+    recognition.stop();
+  } catch (err) {
+    console.log('Detenido', err);
+  }
+}
+
+// Eventos de Mouse (Computadora) y Touch (Celular)
+micBtn.addEventListener('mousedown', startListening);
+micBtn.addEventListener('mouseup', stopListening);
+micBtn.addEventListener('mouseleave', stopListening);
+
+micBtn.addEventListener('touchstart', startListening, { passive: false });
+micBtn.addEventListener('touchend', stopListening, { passive: false });
+micBtn.addEventListener('touchcancel', stopListening, { passive: false });
+
+// Control Visual Apple Glass
 function updateUI(active) {
   if (active) {
     micBtn.classList.add('recording');
-    micIcon.textContent = '⏹️';
-    micLabel.textContent = 'STOP';
-    statusBadge.textContent = 'LIVE';
+    micIcon.textContent = '🗣️';
+    micLabel.textContent = 'REC';
+    statusBadge.textContent = 'TRANSMITIENDO';
     statusBadge.classList.add('active');
     ledIndicator.classList.add('active');
   } else {
     micBtn.classList.remove('recording');
     micIcon.textContent = '🎙️';
-    micLabel.textContent = 'RECORD';
+    micLabel.textContent = 'HOLD';
     statusBadge.textContent = 'STANDBY';
     statusBadge.classList.remove('active');
     ledIndicator.classList.remove('active');
   }
 }
 
-// Event Listeners
-micBtn.addEventListener('click', toggleListening);
-
+// Botones de apoyo
 copyBtn.addEventListener('click', () => {
   if (!transcriptBox.value) return;
   navigator.clipboard.writeText(transcriptBox.value).then(() => {
@@ -125,7 +147,7 @@ copyBtn.addEventListener('click', () => {
 });
 
 clearBtn.addEventListener('click', () => {
-  finalTranscript = '';
+  sessionTranscript = '';
   transcriptBox.value = '';
   wordCounter.textContent = '0 PALABRAS';
 });
