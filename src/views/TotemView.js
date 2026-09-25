@@ -28,7 +28,7 @@ export default {
                   </div>
                 </div>
                 <div class="p-4 rounded-2xl rounded-tl-none bg-purple-900/10 border border-purple-500/30 text-slate-200 text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
-                  Saludos. Soy <strong>Planet IA</strong>. Mi núcleo Aura impulsado por <strong>Gemini Flash</strong> está sincronizado con las operaciones de Aura Hotels. ¿En qué puedo asistirte hoy?
+                  ¡Hola! Qué gusto verte por aquí. ¿En qué te puedo echar la mano hoy para que tu estancia sea épica?
                 </div>
              </div>
              
@@ -70,7 +70,7 @@ export default {
       input.value = '';
       chat.scrollTop = chat.scrollHeight;
 
-      // Indicador de procesamiento en el Núcleo
+      // Indicador de procesamiento
       const loadingId = 'loading-' + Date.now();
       chat.innerHTML += `
         <div id="${loadingId}" class="flex items-start space-x-4">
@@ -80,29 +80,32 @@ export default {
             </div>
           </div>
           <div class="p-4 rounded-2xl rounded-tl-none bg-rose-900/10 border border-rose-500/30 text-slate-400 text-sm italic backdrop-blur-md">
-            Consultando red neuronal Gemini Flash...
+            Pensando la jugada...
           </div>
         </div>
       `;
       chat.scrollTop = chat.scrollHeight;
 
       try {
-        // Conexión segura con el Cloudflare Worker Proxy
+        // Petición con límite de tiempo (timeout de 8 segundos por seguridad)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         const response = await fetch('https://asistente-backend.auraradio-cloud.workers.dev/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: texto })
+          body: JSON.stringify({ message: texto }),
+          signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         const data = await response.json();
         
-        // Limpiar indicador de carga
         const loadingElement = document.getElementById(loadingId);
         if (loadingElement) loadingElement.remove();
 
-        const respuestaIA = data.reply || data.error || "El Núcleo Aura no devolvió respuesta.";
+        const respuestaIA = data.reply || "Vaya, me quedé en blanco un segundo. ¿Me lo repites?";
 
-        // Respuesta real de la IA
         chat.innerHTML += `
           <div class="flex items-start space-x-4">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
@@ -123,8 +126,13 @@ export default {
         
         chat.innerHTML += `
           <div class="flex items-start space-x-4">
-            <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-500 text-rose-400 text-sm">
-              Error de sincronización con el proxy corporativo.
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
+              <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
+                <span class="text-[10px] font-bold text-rose-400 font-mono tracking-widest">IA</span>
+              </div>
+            </div>
+            <div class="p-4 rounded-2xl rounded-tl-none bg-rose-950/40 border border-rose-500 text-rose-300 text-sm backdrop-blur-md">
+              El servidor tardó un poquito en responder. Inténtalo de nuevo, ¡estamos en línea!
             </div>
           </div>
         `;
@@ -134,7 +142,7 @@ export default {
     btn.addEventListener('click', enviar);
     input.addEventListener('keypress', (e) => e.key === 'Enter' && enviar());
 
-    // Motor Gráfico del Canvas
+    // Canvas de fondo
     const canvas = document.getElementById('ia-canvas');
     let animationFrameId;
     
