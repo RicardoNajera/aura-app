@@ -1,23 +1,29 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es" class="h-[100dvh]">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Candado Corporativo: Evita que la pantalla haga zoom accidental al tocar el chat en móviles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aura Quantum Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./src/styles.css">
 </head>
-<body class="h-full bg-[#030508] text-slate-100 overflow-hidden select-none flex flex-col">
-  <nav class="absolute top-0 w-full z-50 px-6 py-3 border-b border-fuchsia-500/20 bg-slate-950/80 backdrop-blur-md flex justify-between items-center">
-    <div class="font-mono text-sm font-bold text-white tracking-widest">
+<body class="h-[100dvh] w-full bg-[#030508] text-slate-100 overflow-hidden select-none flex flex-col m-0 p-0">
+  
+  <!-- BARRA DE NAVEGACIÓN: Integrada al Flexbox (Ya no es absolute, por lo que nunca tapará tu contenido) -->
+  <nav class="w-full z-50 px-4 sm:px-6 py-3 border-b border-fuchsia-500/20 bg-slate-950/80 backdrop-blur-md flex flex-wrap justify-between items-center shrink-0 shadow-lg">
+    <div class="font-mono text-xs sm:text-sm font-bold text-white tracking-widest mb-2 sm:mb-0">
       AURA SUITE <span class="text-fuchsia-400">//</span> PLANET HOLLYWOOD
     </div>
-    <div class="flex space-x-4 font-mono text-xs">
-      <a href="#/totem" class="px-4 py-2 bg-slate-900 border border-slate-700 rounded hover:border-fuchsia-500 transition-colors">🤖 TÓTEM AI</a>
-      <a href="#/radio" class="px-4 py-2 bg-slate-900 border border-slate-700 rounded hover:border-emerald-500 transition-colors">📻 RADIO PTT</a>
+    <div class="flex space-x-2 sm:space-x-4 font-mono text-[10px] sm:text-xs">
+      <a href="#/totem" class="px-3 sm:px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg hover:border-fuchsia-500 transition-all shadow-sm active:scale-95">🤖 TÓTEM AI</a>
+      <a href="#/radio" class="px-3 sm:px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg hover:border-emerald-500 transition-all shadow-sm active:scale-95">📻 RADIO PTT</a>
     </div>
   </nav>
-  <div id="app" class="flex-1 w-full h-full pt-16 relative"></div>
+
+  <!-- CONTENEDOR MAESTRO: Toma exacta y milimétricamente el espacio que sobra debajo del menú -->
+  <div id="app" class="flex-1 w-full relative overflow-hidden"></div>
+  
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>

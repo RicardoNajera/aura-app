@@ -1,16 +1,7 @@
 export default {
   html: () => `
     <style>
-      /* 1. ESTÁNDAR CORPORATIVO: Bloqueo absoluto del body para evitar "tirones" y recargas accidentales en móviles */
-      html, body { 
-        margin: 0; padding: 0; 
-        width: 100%; height: 100%; 
-        background-color: #020305;
-        overflow: hidden; 
-        overscroll-behavior: none; 
-      }
-      
-      /* 2. EFECTOS VISUALES: Animación GPU de colores vibrantes (Rosa, Morado, Azul) sin usar CPU */
+      /* Animación GPU de colores vibrantes (Cero impacto en CPU) */
       @keyframes fluidColors {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -38,27 +29,26 @@ export default {
       ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 10px; }
     </style>
 
-    <!-- CAPA 1: Fondo Visual (Siempre cubre toda la pantalla) -->
-    <div class="fixed inset-0 w-full h-full bg-aurora-gpu z-0"></div>
+    <!-- CAPA 1: Fondo Visual (Fijo en el fondo de toda la pantalla, detrás de tu nav) -->
+    <div class="fixed inset-0 w-full h-full bg-aurora-gpu" style="z-index: -1;"></div>
     
-    <!-- CAPA 2: Contenedor Maestro Universal (Fijado a las 4 esquinas de la pantalla) -->
-    <div class="fixed inset-0 z-10 flex flex-col items-center justify-center p-3 sm:p-6 md:p-10 lg:p-12 box-border">
+    <!-- CAPA 2: Contenedor Maestro (Respeta el pt-16 y el tamaño de #app de tu index.html) -->
+    <div class="relative w-full h-full flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 box-border">
       
-      <!-- CAPA 3: Ventana de Cristal de la App (Se adapta al espacio exacto disponible sin desbordarse) -->
-      <div class="w-full max-w-5xl h-full flex flex-col bg-black/30 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <!-- CAPA 3: Ventana de Cristal (Se estira perfectamente sin salirse ni encimarse) -->
+      <div class="w-full max-w-5xl h-full flex flex-col bg-black/40 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
         
-        <!-- ENCABEZADO (Bloqueado arriba: Nunca se esconde) -->
-        <div class="w-full shrink-0 pt-6 sm:pt-8 pb-4 text-center bg-gradient-to-b from-black/50 to-transparent border-b border-white/5">
+        <!-- ENCABEZADO (Bloqueado arriba) -->
+        <div class="w-full shrink-0 pt-5 sm:pt-7 pb-4 text-center bg-gradient-to-b from-black/60 to-transparent border-b border-white/5">
           <h1 class="text-xl sm:text-2xl md:text-3xl font-light text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 tracking-[0.3em] uppercase drop-shadow-lg">
             AURA <span class="font-bold text-white">IA</span>
           </h1>
-          <div class="w-12 sm:w-16 h-[1px] bg-white/30 mx-auto mt-2 sm:mt-3"></div>
+          <div class="w-12 sm:w-16 h-[1px] bg-white/30 mx-auto mt-2"></div>
         </div>
 
-        <!-- ÁREA DE CHAT (Elástica: Ocupa todo el espacio sobrante y hace scroll) -->
-        <div id="chat-container" class="flex-1 w-full overflow-y-auto p-4 sm:p-6 md:p-8 flex flex-col space-y-4 sm:space-y-6">
+        <!-- ÁREA DE CHAT (Flex-1: Toma el espacio exacto del centro y hace scroll) -->
+        <div id="chat-container" class="flex-1 w-full overflow-y-auto p-4 sm:p-6 flex flex-col space-y-4 sm:space-y-6">
            
-           <!-- Este div empuja los mensajes hacia abajo para que empiecen desde abajo -->
            <div class="mt-auto"></div>
            
            <!-- Mensaje Inicial de la IA -->
@@ -67,13 +57,13 @@ export default {
                 <span class="text-[9px] sm:text-[11px] font-bold text-white font-mono">IA</span>
               </div>
               <div class="px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl sm:rounded-3xl rounded-bl-none bg-white/[0.08] border border-white/10 text-slate-100 text-sm sm:text-base max-w-[90%] sm:max-w-[80%] leading-relaxed font-light shadow-md backdrop-blur-sm">
-                Bienvenido al sistema. ¿En qué le puedo asistir?
+                Bienvenido al sistema corporativo. ¿En qué le puedo asistir?
               </div>
            </div>
         </div>
 
-        <!-- ÁREA DE ENTRADA DE TEXTO (Bloqueada abajo: Nunca se esconde) -->
-        <div class="w-full shrink-0 p-3 sm:p-5 bg-black/50 backdrop-blur-xl border-t border-white/10">
+        <!-- ÁREA DE ENTRADA (Bloqueada abajo) -->
+        <div class="w-full shrink-0 p-3 sm:p-5 bg-black/60 backdrop-blur-xl border-t border-white/10">
           <div class="max-w-4xl mx-auto flex items-end space-x-2 sm:space-x-3 bg-black/60 p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border border-white/10 focus-within:border-purple-500/60 transition-all shadow-inner">
             <textarea id="ai-input" rows="1" class="flex-1 bg-transparent border-none px-4 py-2 sm:py-3 text-slate-100 text-sm sm:text-base font-light focus:outline-none focus:ring-0 resize-none max-h-24 sm:max-h-32 placeholder-slate-400" placeholder="Consulte al conserje..."></textarea>
             
@@ -106,7 +96,6 @@ export default {
       const texto = input.value.trim();
       if (!texto) return;
 
-      // Mensaje del usuario
       chat.innerHTML += `
         <div class="flex items-end justify-end space-x-3 msg-anim w-full">
           <div class="px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl sm:rounded-3xl rounded-br-none bg-blue-900/60 border border-blue-500/40 text-white text-sm sm:text-base max-w-[90%] sm:max-w-[80%] leading-relaxed font-light shadow-md backdrop-blur-md">
@@ -121,7 +110,6 @@ export default {
 
       const loadingId = 'loading-' + Date.now();
       
-      // Indicador de carga
       chat.innerHTML += `
         <div id="${loadingId}" class="flex items-end space-x-3 msg-anim w-full">
           <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900 flex items-center justify-center shrink-0 border border-purple-500/40 shadow-inner">
@@ -152,7 +140,6 @@ export default {
 
         const respuestaIA = data.reply || "Error en la señal. Intente de nuevo.";
 
-        // Respuesta final IA
         chat.innerHTML += `
           <div class="flex items-end space-x-3 msg-anim w-full">
             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.5)] border border-white/20">
