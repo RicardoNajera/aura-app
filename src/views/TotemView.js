@@ -1,47 +1,77 @@
 export default {
   html: () => `
-    <!-- Fondo Cuántico IA -->
-    <canvas id="ia-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
-    
-    <div class="relative z-10 w-full max-w-5xl mx-auto mt-4 p-4 flex flex-col h-[82vh]">
+    <style>
+      /* Fondo animado acelerado por GPU (Cero lag en móviles de bajos recursos) */
+      @keyframes aurora {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .bg-aurora {
+        background: linear-gradient(-45deg, #020305, #080512, #050810, #0a030d);
+        background-size: 400% 400%;
+        animation: aurora 15s ease infinite;
+      }
       
-      <!-- Encabezado Planet IA -->
-      <div class="text-center mb-6">
-        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 tracking-[0.2em] uppercase drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-          PLANET IA
+      /* Animación elegante de entrada de mensajes */
+      @keyframes slideUpFade {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .msg-anim {
+        animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      /* Scrollbar minimalista e invisible */
+      ::-webkit-scrollbar { width: 3px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+
+    <!-- Fondo de Rendimiento Ultra Ligero -->
+    <div class="fixed inset-0 w-full h-full bg-aurora -z-10"></div>
+    
+    <!-- Contenedor adaptativo: usa 'dvh' para no cortarse con los teclados en móviles -->
+    <div class="relative z-10 w-full h-[100dvh] max-w-3xl mx-auto flex flex-col pt-8 pb-4 px-4 sm:px-6">
+      
+      <!-- Encabezado Diamante -->
+      <div class="text-center mb-6 shrink-0 msg-anim">
+        <h1 class="text-2xl sm:text-3xl font-light text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-500 tracking-[0.3em] uppercase">
+          AURA <span class="font-bold text-white">IA</span>
         </h1>
-        <p class="text-xs text-blue-400 font-mono tracking-widest mt-2 uppercase">Núcleo Aura Activo // Conserje Holográfico</p>
+        <div class="w-12 h-[1px] bg-white/20 mx-auto mt-3"></div>
       </div>
 
-      <!-- Caparazón de Cristal y Gradiente -->
-      <div class="flex-1 relative rounded-3xl p-[2px] bg-gradient-to-b from-rose-500 via-purple-500 to-blue-600 shadow-[0_0_40px_rgba(168,85,247,0.25)] flex flex-col transition-all">
-        <div class="flex-1 bg-[#030508]/90 backdrop-blur-xl rounded-[23px] flex flex-col overflow-hidden">
-          
-          <!-- Ventana de Chat -->
-          <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6 font-sans">
-             
-             <!-- Burbuja de Bienvenida IA -->
-             <div class="flex items-start space-x-4">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-blue-500 p-[2px] shadow-[0_0_15px_rgba(168,85,247,0.6)] shrink-0">
-                  <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
-                    <span class="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-blue-400 font-mono tracking-widest">IA</span>
-                  </div>
-                </div>
-                <div class="p-4 rounded-2xl rounded-tl-none bg-purple-900/10 border border-purple-500/30 text-slate-200 text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
-                  ¡Hola! Qué gusto verte por aquí. ¿En qué te puedo echar la mano hoy para que tu estancia sea épica?
-                </div>
-             </div>
-             
-          </div>
+      <!-- Caparazón de Cristal (Glassmorphism Limpio) -->
+      <div class="flex-1 w-full bg-white/[0.02] backdrop-blur-xl rounded-[2rem] border border-white/10 flex flex-col overflow-hidden shadow-2xl relative">
+        
+        <!-- Zona de Chat (Aquí ocurre la magia de empujar hacia arriba) -->
+        <div id="chat-container" class="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6 flex flex-col">
+           
+           <!-- Este div vacío empuja todo el contenido hacia abajo al principio -->
+           <div class="mt-auto"></div>
+           
+           <!-- Burbuja de Bienvenida IA -->
+           <div class="flex items-end space-x-3 msg-anim w-full">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center shrink-0 border border-white/5">
+                <span class="text-[9px] font-bold text-slate-300 font-mono">IA</span>
+              </div>
+              <div class="px-5 py-3.5 rounded-2xl rounded-bl-none bg-white/[0.04] border border-white/5 text-slate-300 text-sm max-w-[85%] leading-relaxed font-light">
+                Bienvenido. ¿En qué le asisto hoy?
+              </div>
+           </div>
+           
+        </div>
 
-          <!-- Controles de Entrada -->
-          <div class="p-4 bg-[#050810]/80 border-t border-purple-500/20 flex items-center space-x-3">
-            <input type="text" id="ai-input" class="flex-1 bg-[#0a0e17] border border-purple-500/30 rounded-xl px-5 py-3 text-slate-200 font-sans focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all placeholder-slate-600 shadow-inner" placeholder="Escribe tu consulta al conserje...">
-            <button id="ai-btn" class="px-8 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-purple-600 to-blue-600 hover:from-rose-500 hover:via-purple-500 hover:to-blue-500 text-white font-mono text-sm font-bold tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] active:scale-95">
-              ENVIAR
+        <!-- Barra de Entrada Flotante -->
+        <div class="p-4 sm:p-5">
+          <div class="flex items-end space-x-2 bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 focus-within:border-white/30 transition-all shadow-inner">
+            <textarea id="ai-input" rows="1" class="flex-1 bg-transparent border-none px-3 py-2 text-slate-200 text-sm font-light focus:outline-none focus:ring-0 resize-none max-h-24 placeholder-slate-600" placeholder="Consulte al conserje..."></textarea>
+            
+            <button id="ai-btn" class="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all shrink-0 active:scale-90 group flex items-center justify-center">
+              <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
             </button>
           </div>
-
         </div>
       </div>
     </div>
@@ -51,45 +81,52 @@ export default {
     const input = document.getElementById('ai-input');
     const chat = document.getElementById('chat-container');
 
+    // Hace que el input crezca si el texto es muy largo sin romper el diseño
+    input.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+      scrollToBottom();
+    });
+
+    const scrollToBottom = () => {
+      chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+    };
+
     const enviar = async () => {
       const texto = input.value.trim();
       if (!texto) return;
 
-      // Burbuja del Usuario
+      // Burbuja del Usuario (Diseño oscuro elegante)
       chat.innerHTML += `
-        <div class="flex items-start justify-end space-x-4">
-          <div class="p-4 rounded-2xl rounded-tr-none bg-blue-900/20 border border-blue-500/30 text-white text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
+        <div class="flex items-end justify-end space-x-3 msg-anim w-full">
+          <div class="px-5 py-3.5 rounded-2xl rounded-br-none bg-slate-800/80 border border-slate-700 text-slate-100 text-sm max-w-[85%] leading-relaxed font-light shadow-sm">
             ${texto}
-          </div>
-          <div class="w-10 h-10 rounded-full bg-slate-800 border border-blue-500/50 flex items-center justify-center shrink-0">
-            <span class="text-[10px] font-mono text-blue-300">TÚ</span>
           </div>
         </div>
       `;
       
       input.value = '';
-      chat.scrollTop = chat.scrollHeight;
+      input.style.height = 'auto';
+      scrollToBottom();
 
-      // Indicador de procesamiento
       const loadingId = 'loading-' + Date.now();
+      
+      // Animación de Pensando (Elegante y sutil)
       chat.innerHTML += `
-        <div id="${loadingId}" class="flex items-start space-x-4">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
-            <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
-              <span class="text-[10px] font-bold text-rose-400 font-mono tracking-widest">IA</span>
-            </div>
+        <div id="${loadingId}" class="flex items-end space-x-3 msg-anim w-full">
+          <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0 border border-white/5">
+            <span class="text-[9px] font-bold text-slate-400 font-mono">IA</span>
           </div>
-          <div class="p-4 rounded-2xl rounded-tl-none bg-rose-900/10 border border-rose-500/30 text-slate-400 text-sm italic backdrop-blur-md">
-            Pensando la jugada...
+          <div class="px-5 py-3.5 rounded-2xl rounded-bl-none bg-transparent text-slate-500 text-xs italic tracking-widest flex items-center space-x-2">
+            <span class="animate-pulse">Sincronizando...</span>
           </div>
         </div>
       `;
-      chat.scrollTop = chat.scrollHeight;
+      scrollToBottom();
 
       try {
-        // Petición con límite de tiempo (timeout de 8 segundos por seguridad)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // Nunca se quedará pasmado
 
         const response = await fetch('https://asistente-backend.auraradio-cloud.workers.dev/', {
           method: 'POST',
@@ -101,109 +138,44 @@ export default {
         clearTimeout(timeoutId);
         const data = await response.json();
         
-        const loadingElement = document.getElementById(loadingId);
-        if (loadingElement) loadingElement.remove();
+        document.getElementById(loadingId)?.remove();
 
-        const respuestaIA = data.reply || "Vaya, me quedé en blanco un segundo. ¿Me lo repites?";
+        const respuestaIA = data.reply || "Hubo una breve interferencia en la red.";
 
+        // Respuesta final de la IA (Diseño destacado pero limpio)
         chat.innerHTML += `
-          <div class="flex items-start space-x-4">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
-              <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
-                <span class="text-[10px] font-bold text-rose-400 font-mono tracking-widest">IA</span>
-              </div>
+          <div class="flex items-end space-x-3 msg-anim w-full">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-200 to-slate-400 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+              <span class="text-[9px] font-bold text-black font-mono">IA</span>
             </div>
-            <div class="p-4 rounded-2xl rounded-tl-none bg-rose-900/10 border border-rose-500/30 text-slate-200 text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
+            <div class="px-5 py-3.5 rounded-2xl rounded-bl-none bg-white/10 border border-white/20 text-slate-100 text-sm max-w-[85%] leading-relaxed font-light shadow-lg backdrop-blur-md">
               ${respuestaIA}
             </div>
           </div>
         `;
-        chat.scrollTop = chat.scrollHeight;
+        scrollToBottom();
 
       } catch (error) {
-        const loadingElement = document.getElementById(loadingId);
-        if (loadingElement) loadingElement.remove();
+        document.getElementById(loadingId)?.remove();
         
         chat.innerHTML += `
-          <div class="flex items-start space-x-4">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
-              <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
-                <span class="text-[10px] font-bold text-rose-400 font-mono tracking-widest">IA</span>
-              </div>
-            </div>
-            <div class="p-4 rounded-2xl rounded-tl-none bg-rose-950/40 border border-rose-500 text-rose-300 text-sm backdrop-blur-md">
-              El servidor tardó un poquito en responder. Inténtalo de nuevo, ¡estamos en línea!
+          <div class="flex items-end space-x-3 msg-anim w-full">
+            <div class="px-5 py-3.5 rounded-2xl rounded-bl-none bg-red-900/20 border border-red-500/20 text-red-300/80 text-sm font-light">
+              Conexión temporalmente interrumpida.
             </div>
           </div>
         `;
+        scrollToBottom();
       }
     };
 
     btn.addEventListener('click', enviar);
-    input.addEventListener('keypress', (e) => e.key === 'Enter' && enviar());
-
-    // Canvas de fondo
-    const canvas = document.getElementById('ia-canvas');
-    let animationFrameId;
-    
-    if (canvas) {
-      const ctx = canvas.getContext('2d', { alpha: false });
-      let width, height;
-
-      const resizeCanvas = () => {
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.scale(dpr, dpr);
-      };
-      
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
-
-      let timeVar = 0;
-      const aiColors = [
-        { r: 244, g: 63, b: 94 },   
-        { r: 168, g: 85, b: 247 },  
-        { r: 59, g: 130, b: 246 }   
-      ];
-
-      const drawNeuralWaves = () => {
-        animationFrameId = requestAnimationFrame(drawNeuralWaves);
-        ctx.fillStyle = '#020305';
-        ctx.fillRect(0, 0, width, height);
-        ctx.globalCompositeOperation = 'screen';
-
-        timeVar += 0.005; 
-        const centerY = height / 2;
-
-        for (let i = 0; i < aiColors.length; i++) {
-          const c = aiColors[i];
-          const phaseOffset = i * (Math.PI / 1.2);
-
-          ctx.beginPath();
-          ctx.lineWidth = 4;
-          ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.15)`;
-
-          for (let x = 0; x <= width + 40; x += 40) {
-            const y = centerY + 
-                      Math.sin(x * 0.002 + timeVar + phaseOffset) * 
-                      Math.cos(x * 0.001 - timeVar) * 150;
-                      
-            if (x === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-        }
-        ctx.globalCompositeOperation = 'source-over';
-      };
-      
-      drawNeuralWaves();
-    }
-
-    return () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
+    input.addEventListener('keypress', (e) => {
+      // Envía con Enter, salta línea con Shift+Enter
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        enviar();
+      }
+    });
   }
 };
