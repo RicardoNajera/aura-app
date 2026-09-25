@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Quantum Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body class="h-full bg-[#030508] text-slate-100 overflow-hidden select-none flex flex-col">
+  <nav class="absolute top-0 w-full z-50 px-6 py-3 border-b border-fuchsia-500/20 bg-slate-950/80 backdrop-blur-md flex justify-between items-center">
+    <div class="font-mono text-sm font-bold text-white tracking-widest">
+      AURA SUITE <span class="text-fuchsia-400">//</span> PLANET HOLLYWOOD
+    </div>
+    <div class="flex space-x-4 font-mono text-xs">
+      <a href="#/totem" class="px-4 py-2 bg-slate-900 border border-slate-700 rounded hover:border-fuchsia-500 transition-colors">🤖 TÓTEM AI</a>
+      <a href="#/radio" class="px-4 py-2 bg-slate-900 border border-slate-700 rounded hover:border-emerald-500 transition-colors">📻 RADIO PTT</a>
+    </div>
+  </nav>
+  <div id="app" class="flex-1 w-full h-full pt-16 relative"></div>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
