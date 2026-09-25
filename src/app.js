@@ -17,7 +17,7 @@ const router = async () => {
     window.currentViewCleanup = null;
   }
 
-  app.innerHTML = View.html();#
+  app.innerHTML = View.html();
 
   if (View.init) {
     window.currentViewCleanup = await View.init();
