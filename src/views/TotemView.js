@@ -28,7 +28,7 @@ export default {
                   </div>
                 </div>
                 <div class="p-4 rounded-2xl rounded-tl-none bg-purple-900/10 border border-purple-500/30 text-slate-200 text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
-                  Saludos. Soy <strong>Planet IA</strong>. Mi núcleo Aura está sincronizado con las operaciones de Planet Hollywood. ¿En qué puedo asombrarte hoy?
+                  Saludos. Soy <strong>Planet IA</strong>. Mi núcleo Aura impulsado por <strong>Gemini Flash</strong> está sincronizado con las operaciones de Aura Hotels. ¿En qué puedo asistirte hoy?
                 </div>
              </div>
              
@@ -36,7 +36,7 @@ export default {
 
           <!-- Controles de Entrada -->
           <div class="p-4 bg-[#050810]/80 border-t border-purple-500/20 flex items-center space-x-3">
-            <input type="text" id="ai-input" class="flex-1 bg-[#0a0e17] border border-purple-500/30 rounded-xl px-5 py-3 text-slate-200 font-sans focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all placeholder-slate-600 shadow-inner" placeholder="Introduce tu consulta en la matriz...">
+            <input type="text" id="ai-input" class="flex-1 bg-[#0a0e17] border border-purple-500/30 rounded-xl px-5 py-3 text-slate-200 font-sans focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all placeholder-slate-600 shadow-inner" placeholder="Escribe tu consulta al conserje...">
             <button id="ai-btn" class="px-8 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-purple-600 to-blue-600 hover:from-rose-500 hover:via-purple-500 hover:to-blue-500 text-white font-mono text-sm font-bold tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] active:scale-95">
               ENVIAR
             </button>
@@ -47,16 +47,15 @@ export default {
     </div>
   `,
   init: async () => {
-    // 1. Lógica del Chat
     const btn = document.getElementById('ai-btn');
     const input = document.getElementById('ai-input');
     const chat = document.getElementById('chat-container');
 
-    const enviar = () => {
+    const enviar = async () => {
       const texto = input.value.trim();
       if (!texto) return;
 
-      // Burbuja del Usuario (Tonos Azules)
+      // Burbuja del Usuario
       chat.innerHTML += `
         <div class="flex items-start justify-end space-x-4">
           <div class="p-4 rounded-2xl rounded-tr-none bg-blue-900/20 border border-blue-500/30 text-white text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
@@ -71,8 +70,39 @@ export default {
       input.value = '';
       chat.scrollTop = chat.scrollHeight;
 
-      // Respuesta simulada de Planet IA (Tonos Rojos/Morados)
-      setTimeout(() => {
+      // Indicador de procesamiento en el Núcleo
+      const loadingId = 'loading-' + Date.now();
+      chat.innerHTML += `
+        <div id="${loadingId}" class="flex items-start space-x-4">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
+            <div class="w-full h-full bg-[#030508] rounded-full flex items-center justify-center">
+              <span class="text-[10px] font-bold text-rose-400 font-mono tracking-widest">IA</span>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl rounded-tl-none bg-rose-900/10 border border-rose-500/30 text-slate-400 text-sm italic backdrop-blur-md">
+            Consultando red neuronal Gemini Flash...
+          </div>
+        </div>
+      `;
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        // Conexión segura con el Cloudflare Worker Proxy
+        const response = await fetch('https://asistente-backend.auraradio-cloud.workers.dev/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: texto })
+        });
+
+        const data = await response.json();
+        
+        // Limpiar indicador de carga
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) loadingElement.remove();
+
+        const respuestaIA = data.reply || data.error || "El Núcleo Aura no devolvió respuesta.";
+
+        // Respuesta real de la IA
         chat.innerHTML += `
           <div class="flex items-start space-x-4">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-purple-500 p-[2px] shadow-[0_0_15px_rgba(244,63,94,0.6)] shrink-0">
@@ -81,18 +111,30 @@ export default {
               </div>
             </div>
             <div class="p-4 rounded-2xl rounded-tl-none bg-rose-900/10 border border-rose-500/30 text-slate-200 text-sm max-w-[80%] shadow-lg backdrop-blur-md leading-relaxed">
-              Solicitud procesada: <span class="text-rose-400 font-mono">"${texto}"</span>. El Núcleo Aura responde con eficiencia.
+              ${respuestaIA}
             </div>
           </div>
         `;
         chat.scrollTop = chat.scrollHeight;
-      }, 600);
+
+      } catch (error) {
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) loadingElement.remove();
+        
+        chat.innerHTML += `
+          <div class="flex items-start space-x-4">
+            <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-500 text-rose-400 text-sm">
+              Error de sincronización con el proxy corporativo.
+            </div>
+          </div>
+        `;
+      }
     };
 
     btn.addEventListener('click', enviar);
     input.addEventListener('keypress', (e) => e.key === 'Enter' && enviar());
 
-    // 2. Motor Gráfico del Canvas (Rojo, Morado, Azul)
+    // Motor Gráfico del Canvas
     const canvas = document.getElementById('ia-canvas');
     let animationFrameId;
     
@@ -113,16 +155,15 @@ export default {
       resizeCanvas();
 
       let timeVar = 0;
-      // Paleta de colores IA Aura
       const aiColors = [
-        { r: 244, g: 63, b: 94 },   // Rosa/Rojo (rose-500)
-        { r: 168, g: 85, b: 247 },  // Morado (purple-500)
-        { r: 59, g: 130, b: 246 }   // Azul (blue-500)
+        { r: 244, g: 63, b: 94 },   
+        { r: 168, g: 85, b: 247 },  
+        { r: 59, g: 130, b: 246 }   
       ];
 
       const drawNeuralWaves = () => {
         animationFrameId = requestAnimationFrame(drawNeuralWaves);
-        ctx.fillStyle = '#020305'; // Fondo ultra oscuro
+        ctx.fillStyle = '#020305';
         ctx.fillRect(0, 0, width, height);
         ctx.globalCompositeOperation = 'screen';
 
@@ -153,9 +194,7 @@ export default {
       drawNeuralWaves();
     }
 
-    // 3. Limpieza de memoria al cambiar de vista
     return () => {
-      console.log("Apagando Núcleo Visual de Planet IA...");
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }
