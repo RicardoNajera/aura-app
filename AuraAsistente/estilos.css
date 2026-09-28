@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Nothing+You+Could+Do&display=swap');
+
+body { font-family: 'Inter', sans-serif; }
+
+/* Fondo nocturno HD del resort */
+.bg-resort-noche {
+  background-image: url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1920');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6) contrast(1.1);
+  transform: scale(1.02); /* Evita bordes blancos por el blur */
+}
+
+/* Cristal ahumado ultra premium */
+.panel-cristal {
+  background: linear-gradient(135deg, rgba(15, 15, 20, 0.4) 0%, rgba(5, 5, 10, 0.6) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cristal-ligero {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Botones Neón Estilo Planet Hollywood */
+.btn-neon {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+}
+.btn-neon:hover {
+  transform: translateX(8px);
+  background: rgba(255,255,255,0.05);
+}
+
+.borde-rosa { border: 1px solid #ff2a7a; box-shadow: 0 0 10px rgba(255, 42, 122, 0.2), inset 0 0 10px rgba(255, 42, 122, 0.1); }
+.borde-azul { border: 1px solid #00b8ff; box-shadow: 0 0 10px rgba(0, 184, 255, 0.2), inset 0 0 10px rgba(0, 184, 255, 0.1); }
+.borde-morado { border: 1px solid #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.2), inset 0 0 10px rgba(168, 85, 247, 0.1); }
+.borde-turquesa { border: 1px solid #2dd4bf; box-shadow: 0 0 10px rgba(45, 212, 191, 0.2), inset 0 0 10px rgba(45, 212, 191, 0.1); }
+.borde-amarillo { border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.2), inset 0 0 10px rgba(234, 179, 8, 0.1); }
+.borde-magenta { border: 1px solid #d946ef; box-shadow: 0 0 10px rgba(217, 70, 239, 0.3), inset 0 0 10px rgba(217, 70, 239, 0.15); }
+
+/* Texto Neón Vibes */
+.texto-neon-vibes {
+  font-family: 'Nothing You Could Do', cursive;
+  background: linear-gradient(90deg, #ff2a7a, #00b8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 20px rgba(255, 42, 122, 0.4);
+}
+
+/* Pulso del Micro */
+@keyframes pulsoMicro {
+  0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+  70% { box-shadow: 0 0 0 20px rgba(168, 85, 247, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+}
+.pulso-micro { animation: pulsoMicro 2s infinite; }
+
+/* Animaciones del chat */
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.anim-subir { animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+/* Scrollbars limpias */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
