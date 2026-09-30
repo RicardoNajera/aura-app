@@ -4,20 +4,45 @@
 const moduloAnimacionesYEstilos = {
   obtenerCss: () => `
     <style>
+      :root {
+        --sat: env(safe-area-inset-top, 0px);
+        --sab: env(safe-area-inset-bottom, 0px);
+        --sal: env(safe-area-inset-left, 0px);
+        --sar: env(safe-area-inset-right, 0px);
+      }
+
+      /* Viewport absoluto 100% que previene cualquier desborde */
+      .app-viewport-total {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-height: -webkit-fill-available;
+        overflow: hidden;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding-left: var(--sal);
+        padding-right: var(--sar);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* ANIMACIONES RANGER PEGADAS A CADA EXTREMO */
       @keyframes animacion-pop-izquierda {
-        0% { opacity: 0; transform: translate3d(-20px, 10px, 0) scale(0.95); }
+        0% { opacity: 0; transform: translate3d(-35px, 0, 0) scale(0.96); }
         100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
       }
       
       @keyframes animacion-pop-derecha {
-        0% { opacity: 0; transform: translate3d(20px, 10px, 0) scale(0.95); }
+        0% { opacity: 0; transform: translate3d(35px, 0, 0) scale(0.96); }
         100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
       }
 
       @keyframes animacion-orbe-flotante {
         0% { transform: translate3d(0, 0, 0) scale(1); }
-        33% { transform: translate3d(30px, -50px, 0) scale(1.05); }
-        66% { transform: translate3d(-20px, 20px, 0) scale(0.95); }
+        33% { transform: translate3d(24px, -36px, 0) scale(1.05); }
+        66% { transform: translate3d(-18px, 16px, 0) scale(0.95); }
         100% { transform: translate3d(0, 0, 0) scale(1); }
       }
 
@@ -31,41 +56,45 @@ const moduloAnimacionesYEstilos = {
         will-change: transform;
       }
 
-      /* BURBUJA PERSONAL (STAFF) - AZUL VIBRANTE Y LUMINOSO */
+      /* BURBUJA PERSONAL (STAFF) - PEGADA TOTALMENTE AL LADO IZQUIERDO */
       .burbuja-personal {
         background: linear-gradient(135deg, #0ea5e9 0%, #0066ff 100%);
-        box-shadow: 0 10px 30px rgba(0, 102, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-bottom-left-radius: 6px !important;
-        animation: animacion-pop-izquierda 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        box-shadow: 0 10px 28px rgba(0, 102, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-bottom-left-radius: 4px !important;
+        animation: animacion-pop-izquierda 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         will-change: transform, opacity;
       }
 
-      /* BURBUJA HUÉSPED (GUEST) - MORADO VIBRANTE */
+      /* BURBUJA HUÉSPED (GUEST) - PEGADA TOTALMENTE AL LADO DERECHO */
       .burbuja-huesped {
         background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
-        box-shadow: 0 10px 30px rgba(126, 34, 206, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        border-bottom-right-radius: 6px !important;
-        animation: animacion-pop-derecha 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        box-shadow: 0 10px 28px rgba(126, 34, 206, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        border-bottom-right-radius: 4px !important;
+        animation: animacion-pop-derecha 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         will-change: transform, opacity;
       }
 
       .encabezado-cristal {
-        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        background: linear-gradient(to bottom, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.6) 100%);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        padding-top: calc(var(--sat) + 0.75rem);
+        padding-bottom: 0.75rem;
         transform: translateZ(0); 
       }
 
       .pie-pagina-cristal {
-        background: rgba(18, 18, 22, 0.42);
-        backdrop-filter: blur(35px) saturate(180%);
-        -webkit-backdrop-filter: blur(35px) saturate(180%);
+        background: rgba(18, 18, 22, 0.72);
+        backdrop-filter: blur(32px) saturate(180%);
+        -webkit-backdrop-filter: blur(32px) saturate(180%);
         border-top: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -8px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        padding-top: 0.75rem;
+        padding-bottom: calc(var(--sab) + 0.75rem);
         transform: translateZ(0);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #wave-staff {
@@ -98,7 +127,7 @@ const moduloAnimacionesYEstilos = {
         width: 0px;
         opacity: 0;
         pointer-events: none;
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         white-space: nowrap;
         overflow: hidden;
         position: absolute;
@@ -107,42 +136,42 @@ const moduloAnimacionesYEstilos = {
       }
       
       #btn-cancelar-staff.activo {
-        width: 140px;
+        width: clamp(110px, 30vw, 138px);
         opacity: 1;
         pointer-events: auto;
-        transform: translateY(-50%) scale(1) translateX(24px);
+        transform: translateY(-50%) scale(1) translateX(16px);
       }
 
       #btn-cancelar-guest.activo {
-        width: 140px;
+        width: clamp(110px, 30vw, 138px);
         opacity: 1;
         pointer-events: auto;
-        transform: translateY(-50%) scale(1) translateX(-24px);
+        transform: translateY(-50%) scale(1) translateX(-16px);
       }
 
       .contenedor-lateral {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .lateral-oculto {
         opacity: 0;
-        transform: scale(0.9);
+        transform: scale(0.85);
         pointer-events: none;
       }
 
       @keyframes pop-icono-rostro {
         0% { transform: scale(0) translateY(10px); opacity: 0; }
-        60% { transform: scale(1.3) translateY(-2px); opacity: 1; }
+        60% { transform: scale(1.25) translateY(-2px); opacity: 1; }
         100% { transform: scale(1) translateY(0); opacity: 1; }
       }
       
       .animacion-rostro-pop {
-        animation: pop-icono-rostro 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation: pop-icono-rostro 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         display: inline-flex;
         will-change: transform, opacity;
       }
 
-      ::-webkit-scrollbar { width: 0px; background: transparent; }
+      ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
     </style>
   `
 };
@@ -154,83 +183,84 @@ const moduloPlantillasInterfaz = {
   generarEstructuraPrincipal: () => `
     ${moduloAnimacionesYEstilos.obtenerCss()}
 
-    <div class="flex-1 flex flex-col h-full w-full bg-[#050505] text-white relative overflow-hidden font-sans select-none">
+    <div class="app-viewport-total bg-[#050505] text-white font-sans select-none">
       
-      <div class="absolute -top-20 -left-20 w-[600px] h-[600px] bg-sky-600/15 rounded-full blur-[140px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform;"></div>
-      <div class="absolute -bottom-20 -right-20 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out; will-change: transform;"></div>
+      <!-- Fondos de ambientación lumínica -->
+      <div class="absolute -top-20 -left-20 w-[65vw] h-[65vw] max-w-[500px] max-h-[500px] bg-sky-600/15 rounded-full blur-[110px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform;"></div>
+      <div class="absolute -bottom-20 -right-20 w-[65vw] h-[65vw] max-w-[460px] max-h-[460px] bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out; will-change: transform;"></div>
 
-      <!-- HEADER MODIFICADO: CENTRADO, SIN BOTÓN DE REGRESAR Y SIN ESTRELLA -->
-      <header class="encabezado-cristal pt-12 pb-4 px-6 z-30 flex flex-col items-center justify-center absolute top-0 w-full shadow-2xl">
+      <!-- HEADER FIJO -->
+      <header class="encabezado-cristal shrink-0 z-30 flex flex-col items-center justify-center w-full px-4 shadow-xl">
         <div class="flex flex-col items-center justify-center">
-          <h1 class="text-[18px] font-bold tracking-wide flex items-center justify-center drop-shadow-md text-center">
+          <h1 class="text-[17px] sm:text-[19px] font-bold tracking-wide flex items-center justify-center drop-shadow-md text-center">
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600">Planet Hollywood</span>
           </h1>
-          <h2 class="text-[10px] font-semibold text-white/60 tracking-[0.2em] uppercase mt-1 text-center">Cancún</h2>
+          <h2 class="text-[10px] font-semibold text-white/60 tracking-[0.22em] uppercase mt-0.5 text-center">Cancún</h2>
         </div>
       </header>
 
+      <!-- ÁREA DE CHAT: ANCHO COMPLETO PARA CONTROLAR EL CONTACTO DIRECTO CON LOS BORDES -->
       <div 
         id="chat-container" 
-        class="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-5 pt-36 z-10 flex flex-col select-none"
-        style="padding-bottom: 120px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;"
+        class="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-4 z-10 flex flex-col select-none"
+        style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;"
       >
         <div class="w-full flex justify-center mb-4 opacity-60 shrink-0">
-          <div class="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold tracking-widest text-white/80 uppercase shadow-lg">
+          <div class="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold tracking-widest text-white/80 uppercase shadow">
             Inicio de Conversación
           </div>
         </div>
 
         <div id="mensajes-wrapper" class="flex flex-col w-full"></div>
-        <div id="scroll-anchor" class="w-full h-[15px] shrink-0 pointer-events-none"></div>
+        <div id="scroll-anchor" class="w-full h-4 shrink-0 pointer-events-none"></div>
       </div>
 
-      <div id="footer-container" class="pie-pagina-cristal py-3 px-4 z-30 w-full absolute bottom-0 flex justify-center items-center max-w-3xl mx-auto left-0 right-0">
-        <div class="flex w-full justify-between items-center relative px-2">
+      <!-- FOOTER DINÁMICO ELEVADO -->
+      <div id="footer-container" class="pie-pagina-cristal shrink-0 z-30 w-full flex justify-center items-center">
+        <div class="flex w-full max-w-2xl justify-between items-center px-3 sm:px-6 relative">
           
           <!-- LADO IZQUIERDO (STAFF) -->
-          <div id="wrapper-staff" class="contenedor-lateral flex flex-row items-center gap-3 relative p-2 transition-all duration-500">
-            <div class="flex flex-col items-center justify-center min-w-[55px] max-w-[120px]">
+          <div id="wrapper-staff" class="contenedor-lateral flex flex-row items-center gap-3 relative p-1.5">
+            <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
               <div id="iconos-staff" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
-              <p id="lang-staff" class="text-[10px] font-medium text-sky-400 transition-colors mt-1.5"></p>
+              <p id="lang-staff" class="text-[10px] font-medium text-sky-400 transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
             </div>
 
-            <div id="container-mic-staff" class="relative flex items-center justify-center rounded-full transition-all duration-500 p-1">
+            <div id="container-mic-staff" class="relative flex items-center justify-center rounded-full p-1">
               <div id="wave-staff"></div>
               
-              <button id="btn-grabar-staff" class="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#0066ff] flex items-center justify-center shadow-[0_8px_30px_rgba(0,102,255,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-sky-300/40">
-                <!-- Icono de colaborador de oficina / staff con alto contraste y relieve -->
+              <button id="btn-grabar-staff" class="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#0066ff] flex items-center justify-center shadow-[0_8px_28px_rgba(0,102,255,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-sky-300/40">
                 <svg class="w-8 h-8 text-sky-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                   <polygon points="12,14.5 13.5,18 12,21.5 10.5,18" fill="#ffffff" opacity="0.95"/>
                 </svg>
               </button>
 
-              <button id="btn-cancelar-staff" class="pastilla-cancelar left-[calc(100%-4px)] h-[48px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-start backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
-                <svg class="w-5 h-5 shrink-0 ml-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                <span class="text-[13px] font-bold tracking-wide">Cancelar</span>
+              <button id="btn-cancelar-staff" class="pastilla-cancelar left-[calc(100%-4px)] h-[46px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-start backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
+                <svg class="w-5 h-5 shrink-0 ml-3 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span class="text-[12px] sm:text-[13px] font-bold tracking-wide mr-3">Cancelar</span>
               </button>
             </div>
           </div>
 
-          <div id="divisor" class="w-[1px] h-10 bg-white/10 rounded-full transition-opacity duration-300 shadow-sm mx-2"></div>
+          <div id="divisor" class="w-[1px] h-9 bg-white/10 rounded-full transition-opacity duration-300 mx-2 shrink-0"></div>
 
           <!-- LADO DERECHO (GUEST) -->
-          <div id="wrapper-guest" class="contenedor-lateral flex flex-row-reverse items-center gap-3 relative p-2 transition-all duration-500">
-            <div class="flex flex-col items-center justify-center min-w-[55px] max-w-[120px]">
+          <div id="wrapper-guest" class="contenedor-lateral flex flex-row-reverse items-center gap-3 relative p-1.5">
+            <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
               <div id="iconos-guest" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
-              <p id="lang-guest" class="text-[10px] font-medium text-purple-400 transition-colors mt-1.5"></p>
+              <p id="lang-guest" class="text-[10px] font-medium text-purple-400 transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
             </div>
 
-            <div id="container-mic-guest" class="relative flex items-center justify-center rounded-full transition-all duration-500 p-1">
-              <button id="btn-cancelar-guest" class="pastilla-cancelar right-[calc(100%-4px)] h-[48px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-end backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
-                <span class="text-[13px] font-bold tracking-wide ml-3.5 mr-1.5">Cancelar</span>
-                <svg class="w-5 h-5 shrink-0 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <div id="container-mic-guest" class="relative flex items-center justify-center rounded-full p-1">
+              <button id="btn-cancelar-guest" class="pastilla-cancelar right-[calc(100%-4px)] h-[46px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-end backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
+                <span class="text-[12px] sm:text-[13px] font-bold tracking-wide ml-3">Cancelar</span>
+                <svg class="w-5 h-5 shrink-0 mr-3 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
 
               <div id="wave-guest"></div>
               
-              <button id="btn-grabar-guest" class="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#a855f7] to-[#7e22ce] flex items-center justify-center shadow-[0_8px_30px_rgba(126,34,206,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-purple-300/40">
-                <!-- Estrella formal biselada temática Planet Hollywood con facetado premium -->
+              <button id="btn-grabar-guest" class="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#a855f7] to-[#7e22ce] flex items-center justify-center shadow-[0_8px_28px_rgba(126,34,206,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-purple-300/40">
                 <svg class="w-8 h-8 drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]" viewBox="0 0 24 24">
                   <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77" fill="#f3e8ff"/>
                   <polygon points="12,2 8.91,8.26 2,9.27 7,14.14 5.82,21.02 12,17.77" fill="#d8b4fe"/>
@@ -244,11 +274,17 @@ const moduloPlantillasInterfaz = {
     </div>
   `,
 
+  /* ==========================================================================
+     BURBUJAS PEGADAS A SUS RESPECTIVOS LADOS Y SEPARADAS DEL EXTREMO OPUESTO
+     ========================================================================== */
   generarBurbujaHtml: (hablantes, rol, textoTraducidoCompleto, isoDestino, iconoPersona, audioBase64) => {
     if (!hablantes || hablantes.length === 0) return "";
     
     const esStaff = rol === "staff";
-    const alineacion = esStaff ? "justify-start" : "justify-end";
+    // STAFF: mr-10 sm:mr-24 (pegado a la izquierda, separado de la derecha)
+    // GUEST: ml-10 sm:ml-24 (pegado a la derecha, separado de la izquierda)
+    const margenContrario = esStaff ? "mr-8 sm:mr-20" : "ml-8 sm:ml-20";
+    const alineacion = esStaff ? "justify-start text-left" : "justify-end text-left";
     const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
     
     return hablantes.map((h) => {
@@ -261,24 +297,24 @@ const moduloPlantillasInterfaz = {
 
       const tagIdioma = emojiBandera ? `
         <div class="flex items-center gap-1.5 mb-2 opacity-90">
-          <span class="text-[12px] bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm shadow-sm border border-white/10">${emojiBandera}</span>
-          <span class="text-[9px] font-bold tracking-widest uppercase text-white/50">${nombreIdioma}</span>
+          <span class="text-[12px] bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm shadow border border-white/10">${emojiBandera}</span>
+          <span class="text-[9px] font-bold tracking-widest uppercase text-white/60">${nombreIdioma}</span>
         </div>
       ` : '';
 
       return `
-      <div class="flex ${alineacion} w-full my-[15px] shrink-0">
-        <div class="max-w-[88%] sm:max-w-[80%] rounded-[24px] px-5 py-4 ${claseBurbuja} relative group">
+      <div class="flex ${alineacion} w-full my-2.5 shrink-0">
+        <div class="w-auto ${margenContrario} rounded-[22px] px-4 sm:px-5 py-3.5 ${claseBurbuja} relative group">
           ${tagIdioma}
-          <p class="text-[14px] sm:text-[15px] font-normal leading-snug text-white/50 break-words whitespace-pre-wrap">${h.frase_original || h.texto_original || "..."}</p>
+          <p class="text-[13px] sm:text-[14px] font-normal leading-snug text-white/60 break-words whitespace-pre-wrap">${h.frase_original || h.texto_original || "..."}</p>
           <div class="h-[1px] w-full bg-gradient-to-r from-white/5 via-white/20 to-white/5 my-2.5 rounded-full"></div>
           
           <div class="flex items-end justify-between gap-3">
-            <p class="text-[19px] sm:text-[21px] font-bold leading-tight text-white drop-shadow-md break-words whitespace-pre-wrap tracking-tight flex-1">${h.frase_traducida || h.texto_traducida || "..."}</p>
+            <p class="text-[17px] sm:text-[19px] font-bold leading-snug text-white drop-shadow-md break-words whitespace-pre-wrap tracking-tight flex-1">${h.frase_traducida || h.texto_traducida || "..."}</p>
             
             <button 
               type="button"
-              class="btn-repetir-voz p-2 -mr-1 -mb-1 rounded-full bg-white/10 hover:bg-white/20 active:scale-85 transition-all text-white/80 shrink-0"
+              class="btn-repetir-voz p-2 -mr-1 -mb-1 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 transition-all text-white/80 shrink-0"
               data-texto="${textoPronunciar}"
               data-iso="${isoPronunciar}"
               data-icono="${iconoFinal}"
@@ -297,10 +333,11 @@ const moduloPlantillasInterfaz = {
 
   generarHtmlEscribiendo: (rol, idUnico) => {
     const esStaff = rol === "staff";
+    const margenContrario = esStaff ? "mr-8 sm:mr-20" : "ml-8 sm:ml-20";
     const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
     return `
-      <div id="${idUnico}" class="flex ${esStaff ? 'justify-start' : 'justify-end'} w-full my-[15px] shrink-0">
-        <div class="max-w-[85%] rounded-[24px] px-5 py-4 ${claseBurbuja} flex items-center gap-1.5 h-[56px]">
+      <div id="${idUnico}" class="flex ${esStaff ? 'justify-start' : 'justify-end'} w-full my-2.5 shrink-0">
+        <div class="w-auto ${margenContrario} rounded-[22px] px-5 py-3.5 ${claseBurbuja} flex items-center gap-1.5 h-[52px]">
           <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0s"></div>
           <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.2s"></div>
           <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.4s"></div>
@@ -313,15 +350,15 @@ const moduloPlantillasInterfaz = {
       ? "bg-red-500/20 text-red-400 border-red-500/30" 
       : "bg-white/10 text-white/70 border-white/5";
     return `
-      <div class="flex w-full justify-center my-1 shrink-0">
-        <div class="${colorClase} border px-4 py-1 rounded-full text-[11px] font-medium tracking-wide backdrop-blur-md shadow-sm">
+      <div class="flex w-full justify-center my-1.5 shrink-0">
+        <div class="${colorClase} border px-4 py-1.5 rounded-full text-[11px] font-medium tracking-wide backdrop-blur-md shadow-sm">
           ${mensaje}
         </div>
       </div>`;
   },
 
   generarPastillaReintentarHtml: (idPastilla) => `
-    <div id="${idPastilla}" class="flex w-full justify-center my-1 shrink-0">
+    <div id="${idPastilla}" class="flex w-full justify-center my-1.5 shrink-0">
       <div class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-4 py-1.5 rounded-full text-[11px] font-medium tracking-wide backdrop-blur-md shadow-md flex items-center gap-2">
         <span>Conexión lenta sin respuesta</span>
         <button type="button" class="btn-ejecutar-reintento underline font-bold hover:text-white transition-colors cursor-pointer">
@@ -372,7 +409,7 @@ const moduloAnimacionMedusa = {
       let escalaObjetivo = 1.05 + (Math.sin(this.faseRespiracion) * 0.04);
       if (promedioVoz > 3) {
         const factorNormalizado = (promedioVoz - 3) / 100;
-        escalaObjetivo = Math.min(1.48, 1.08 + (factorNormalizado * 0.40));
+        escalaObjetivo = Math.min(1.45, 1.08 + (factorNormalizado * 0.38));
       }
 
       this.escalaActual += (escalaObjetivo - this.escalaActual) * 0.32;
@@ -649,7 +686,7 @@ export default {
     };
 
     // --------------------------------------------------------------------------
-    // PIPELINE DE ENVÍO: 0s, 2.5s, 8s Y CORTE A LOS 15s CON REINTENTO
+    // PIPELINE DE ENVÍO
     // --------------------------------------------------------------------------
     const enviarAudioAlServidor = (audioBlob, rol) => {
       limpiarPastillaReintento();
@@ -657,7 +694,6 @@ export default {
 
       const etiquetaActual = `etiqueta_${Date.now()}_${++state.contadorTurnos}`;
       state.etiquetaUltimaValida = etiquetaActual;
-
       state.ultimoAudioFallido = { blob: audioBlob, rol: rol };
 
       const isoContrario = rol === "staff" 
@@ -744,20 +780,16 @@ export default {
           });
       };
 
-      // 1. Intento 1: Inmediato (0s)
       dispararIntento(1);
 
-      // 2. Intento 2: A los 2.5s
       temporizadores.push(setTimeout(() => {
         dispararIntento(2);
       }, 2500));
 
-      // 3. Intento 3: A los 8s
       temporizadores.push(setTimeout(() => {
         dispararIntento(3);
       }, 8000));
 
-      // 4. Límite: 15s
       temporizadores.push(setTimeout(() => {
         if (!respuestaProcesada && state.etiquetaUltimaValida === etiquetaActual) {
           controladores.forEach(c => { try { c.abort(); } catch (e) { } });
@@ -878,7 +910,6 @@ export default {
     dom.btnCancelarStaff.addEventListener('click', handleCancelar);
     dom.btnCancelarGuest.addEventListener('click', handleCancelar);
 
-    // EVENT DELEGATION: REPETIR AUDIO O REINTENTAR ENVÍO
     dom.chatContainer.addEventListener('click', (e) => {
       const botonRepetir = e.target.closest('.btn-repetir-voz');
       if (botonRepetir) {
