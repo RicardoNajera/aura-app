@@ -1,653 +1,901 @@
-export default {
-  html: () => {
-    return `
-      <style>
-        /* =========================================
-           1. CORE ANIMATIONS & APPLE EFFECTS
-           ========================================= */
-        @keyframes pop-receive {
-          0% { transform: scale(0.95); opacity: 0.5; filter: blur(4px); }
-          50% { transform: scale(1.02); filter: blur(0px) brightness(1.2); }
-          100% { transform: scale(1); opacity: 1; filter: blur(0px) brightness(1); }
-        }
-        
-        /* Animación ultra-fluida para las nuevas burbujas de chat */
-        @keyframes bubble-in {
-          0% { transform: scale(0.85) translateY(15px); opacity: 0; filter: blur(8px); }
-          100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
-        }
+/* ==========================================================================
+   MODULO 1: ESTILOS Y ANIMACIONES CSS
+   ========================================================================== */
+const moduloAnimacionesYEstilos = {
+  obtenerCss: () => `
+    <style>
+      @keyframes animacion-pop-izquierda {
+        0% { opacity: 0; transform: translate3d(-20px, 10px, 0) scale(0.95); }
+        100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      }
+      
+      @keyframes animacion-pop-derecha {
+        0% { opacity: 0; transform: translate3d(20px, 10px, 0) scale(0.95); }
+        100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      }
 
-        @keyframes text-glow-magic {
-          0% { color: transparent; text-shadow: 0 0 20px rgba(255,255,255,0); opacity: 0; transform: translateY(5px); }
-          30% { color: #ffffff; text-shadow: 0 0 15px rgba(255,255,255,1); opacity: 1; transform: translateY(0); }
-          100% { color: rgba(255,255,255,0.95); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-        }
-        
-        @keyframes orb-float {
-          0% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0, 0) scale(1); }
-        }
-        
-        @keyframes siri-staff-glow {
-          0% { box-shadow: 0 0 20px 5px rgba(10,132,255,0.4), inset 0 0 20px rgba(94,92,230,0.5); }
-          50% { box-shadow: 0 0 45px 15px rgba(10,132,255,0.8), inset 0 0 30px rgba(94,92,230,0.8); background: rgba(10,132,255,0.3); }
-          100% { box-shadow: 0 0 20px 5px rgba(10,132,255,0.4), inset 0 0 20px rgba(94,92,230,0.5); }
-        }
-        @keyframes siri-guest-glow {
-          0% { box-shadow: 0 0 20px 5px rgba(255,159,10,0.4), inset 0 0 20px rgba(255,55,95,0.5); }
-          50% { box-shadow: 0 0 45px 15px rgba(255,159,10,0.8), inset 0 0 30px rgba(255,55,95,0.8); background: rgba(255,159,10,0.3); }
-          100% { box-shadow: 0 0 20px 5px rgba(255,159,10,0.4), inset 0 0 20px rgba(255,55,95,0.5); }
-        }
+      @keyframes animacion-orbe-flotante {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        33% { transform: translate3d(30px, -50px, 0) scale(1.05); }
+        66% { transform: translate3d(-20px, 20px, 0) scale(0.95); }
+        100% { transform: translate3d(0, 0, 0) scale(1); }
+      }
 
-        /* =========================================
-           2. GLASSMORPHISM & UI COMPONENTS
-           ========================================= */
-        .apple-glass {
-          background: rgba(28, 28, 30, 0.45);
-          backdrop-filter: blur(40px);
-          -webkit-backdrop-filter: blur(40px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 24px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        .apple-glass-red {
-          background: rgba(255, 59, 48, 0.15);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 59, 48, 0.3);
-          box-shadow: 0 10px 30px rgba(255, 59, 48, 0.2);
-        }
-        
-        .scanner-pill {
-          background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-          border: 1px solid rgba(255,255,255,0.15);
-          box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
-          backdrop-filter: blur(10px);
-        }
+      @keyframes rebote-puntos-escritura {
+        0%, 60%, 100% { transform: translate3d(0, 0, 0); }
+        30% { transform: translate3d(0, -4px, 0); }
+      }
 
-        .anim-receive { animation: pop-receive 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .anim-text-glow { animation: text-glow-magic 1.2s ease-out forwards; }
-        .animate-bubble-in { animation: bubble-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        
-        .bubble-transition { transition: all 0.6s cubic-bezier(0.25, 1, 0.3, 1); }
-        .btn-cancelar { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .onda-voz { transition: transform 0.08s ease-out; }
-        
-        .onda-activa-staff { animation: siri-staff-glow 2s infinite ease-in-out; }
-        .onda-activa-guest { animation: siri-guest-glow 2s infinite ease-in-out; }
+      .punto-escritura {
+        animation: rebote-puntos-escritura 1.4s infinite ease-in-out both;
+        will-change: transform;
+      }
 
-        /* Máscara de desvanecimiento para el scroll (Efecto iOS) */
-        .scroll-mask {
-          mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
-          -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
-        }
+      /* BURBUJA PERSONAL (STAFF) - AZUL VIBRANTE Y LUMINOSO */
+      .burbuja-personal {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0066ff 100%);
+        box-shadow: 0 10px 30px rgba(0, 102, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-bottom-left-radius: 6px !important;
+        animation: animacion-pop-izquierda 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        will-change: transform, opacity;
+      }
 
-        /* SCROLLBAR INVISIBLE */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
-      </style>
+      /* BURBUJA HUÉSPED (GUEST) - MORADO VIBRANTE */
+      .burbuja-huesped {
+        background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+        box-shadow: 0 10px 30px rgba(126, 34, 206, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        border-bottom-right-radius: 6px !important;
+        animation: animacion-pop-derecha 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        will-change: transform, opacity;
+      }
 
-      <div class="flex-1 flex flex-col h-full w-full bg-[#000000] text-white relative overflow-hidden font-sans select-none">
-        
-        <!-- FONDOS ORGÁNICOS -->
-        <div class="absolute -top-20 -left-20 w-[500px] h-[500px] bg-[#0A84FF]/10 rounded-full blur-[120px] pointer-events-none" style="animation: orb-float 15s infinite alternate ease-in-out;"></div>
-        <div class="absolute -bottom-20 -right-20 w-[500px] h-[500px] bg-[#FF9F0A]/10 rounded-full blur-[120px] pointer-events-none" style="animation: orb-float 18s infinite alternate-reverse ease-in-out;"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#5E5CE6]/5 rounded-full blur-[150px] pointer-events-none"></div>
+      .encabezado-cristal {
+        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        transform: translateZ(0); 
+      }
 
-        <!-- HEADER CRISTALINO -->
-        <header class="pt-14 pb-4 px-6 z-20 flex items-center justify-between absolute top-0 w-full bg-gradient-to-b from-black/80 to-transparent">
-          <button id="btn-cerrar-traductor" class="w-11 h-11 rounded-full apple-glass flex items-center justify-center text-white/80 active:scale-90 transition-transform duration-300 group">
-            <svg class="w-5 h-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-          </button>
-          
-          <div class="apple-glass px-5 py-2 rounded-full flex flex-col items-center shadow-lg">
-            <h1 class="text-[14px] font-bold tracking-widest text-white/95 uppercase font-mono">Aura AI</h1>
-            <h2 class="text-[10px] font-medium text-white/40 tracking-[0.2em] uppercase mt-0.5">Live Interpreter</h2>
+      .pie-pagina-cristal {
+        background: rgba(18, 18, 22, 0.42);
+        backdrop-filter: blur(35px) saturate(180%);
+        -webkit-backdrop-filter: blur(35px) saturate(180%);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transform: translateZ(0);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #wave-staff {
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.7) 0%, rgba(59, 130, 246, 0.45) 50%, rgba(0, 102, 255, 0.2) 80%, transparent 100%);
+        filter: blur(10px);
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+        will-change: transform, border-radius, opacity;
+        transition: opacity 0.25s ease-out;
+      }
+
+      #wave-guest {
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(192, 132, 252, 0.7) 0%, rgba(168, 85, 247, 0.45) 50%, rgba(126, 34, 206, 0.2) 80%, transparent 100%);
+        filter: blur(10px);
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+        will-change: transform, border-radius, opacity;
+        transition: opacity 0.25s ease-out;
+      }
+
+      .pastilla-cancelar {
+        width: 0px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        white-space: nowrap;
+        overflow: hidden;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%) scale(0.9);
+      }
+      
+      #btn-cancelar-staff.activo {
+        width: 140px;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(-50%) scale(1) translateX(24px);
+      }
+
+      #btn-cancelar-guest.activo {
+        width: 140px;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(-50%) scale(1) translateX(-24px);
+      }
+
+      .contenedor-lateral {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .lateral-oculto {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+      }
+
+      @keyframes pop-icono-rostro {
+        0% { transform: scale(0) translateY(10px); opacity: 0; }
+        60% { transform: scale(1.3) translateY(-2px); opacity: 1; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
+      
+      .animacion-rostro-pop {
+        animation: pop-icono-rostro 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        display: inline-flex;
+        will-change: transform, opacity;
+      }
+
+      ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+  `
+};
+
+/* ==========================================================================
+   MODULO 2: PLANTILLAS VISUALES DE INTERFAZ HTML
+   ========================================================================== */
+const moduloPlantillasInterfaz = {
+  generarEstructuraPrincipal: () => `
+    ${moduloAnimacionesYEstilos.obtenerCss()}
+
+    <div class="flex-1 flex flex-col h-full w-full bg-[#050505] text-white relative overflow-hidden font-sans select-none">
+      
+      <div class="absolute -top-20 -left-20 w-[600px] h-[600px] bg-sky-600/15 rounded-full blur-[140px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform;"></div>
+      <div class="absolute -bottom-20 -right-20 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out; will-change: transform;"></div>
+
+      <!-- HEADER MODIFICADO: CENTRADO, SIN BOTÓN DE REGRESAR Y SIN ESTRELLA -->
+      <header class="encabezado-cristal pt-12 pb-4 px-6 z-30 flex flex-col items-center justify-center absolute top-0 w-full shadow-2xl">
+        <div class="flex flex-col items-center justify-center">
+          <h1 class="text-[18px] font-bold tracking-wide flex items-center justify-center drop-shadow-md text-center">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600">Planet Hollywood</span>
+          </h1>
+          <h2 class="text-[10px] font-semibold text-white/60 tracking-[0.2em] uppercase mt-1 text-center">Cancún</h2>
+        </div>
+      </header>
+
+      <div 
+        id="chat-container" 
+        class="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-5 pt-36 z-10 flex flex-col select-none"
+        style="padding-bottom: 120px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;"
+      >
+        <div class="w-full flex justify-center mb-4 opacity-60 shrink-0">
+          <div class="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold tracking-widest text-white/80 uppercase shadow-lg">
+            Inicio de Conversación
           </div>
-          
-          <div class="w-11"></div> 
-        </header>
-
-        <!-- ZONA DE CONVERSACIÓN (Burbujas dinámicas con Scroll Mask) -->
-        <div class="flex-1 flex flex-col p-6 gap-8 justify-center z-10 overflow-y-auto max-w-2xl mx-auto w-full relative mt-16 mb-32 scroll-mask">
-          
-          <!-- CONTENEDOR STAFF -->
-          <div id="bubble-staff" class="bubble-transition apple-glass rounded-[36px] p-5 sm:p-7 relative overflow-hidden group h-auto w-full">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            
-            <div class="flex items-center justify-between mb-5 relative z-10">
-              <div class="flex items-center gap-4">
-                <div class="scanner-pill min-w-[56px] min-h-[36px] h-auto rounded-[18px] flex flex-wrap items-center justify-center px-3 py-1 gap-1.5 shadow-[0_0_15px_rgba(10,132,255,0.15)] relative">
-                  <div class="absolute inset-0 rounded-[18px] border border-[#0A84FF]/20 animate-pulse pointer-events-none"></div>
-                  <span id="iconos-staff" class="text-[16px] tracking-[0.1em] text-center leading-tight drop-shadow-md">👨🇲🇽</span>
-                </div>
-                <div>
-                  <p class="text-[10px] font-bold text-white/40 uppercase tracking-[0.15em]">Personal</p>
-                  <p id="lang-staff" class="text-[14px] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#0A84FF] to-[#5E5CE6]">Español</p>
-                </div>
-              </div>
-              <div id="typing-staff" class="hidden items-center gap-1.5 opacity-80">
-                <div class="w-2 h-2 bg-gradient-to-r from-[#0A84FF] to-[#5E5CE6] rounded-full animate-bounce shadow-[0_0_8px_#0A84FF]"></div>
-                <div class="w-2 h-2 bg-gradient-to-r from-[#0A84FF] to-[#5E5CE6] rounded-full animate-bounce shadow-[0_0_8px_#0A84FF]" style="animation-delay: 0.15s"></div>
-                <div class="w-2 h-2 bg-gradient-to-r from-[#0A84FF] to-[#5E5CE6] rounded-full animate-bounce shadow-[0_0_8px_#0A84FF]" style="animation-delay: 0.3s"></div>
-              </div>
-            </div>
-
-            <!-- Aquí se inyectan las burbujas futuristas -->
-            <div id="texto-staff" class="min-h-[48px] relative z-10 w-full transition-all duration-300 flex flex-col justify-center">
-              
-              <!-- Burbuja Inicial por defecto (Estilo Chat) -->
-              <div class="flex flex-row items-end gap-2 sm:gap-3 w-full animate-bubble-in">
-                  <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[16px] shadow-sm backdrop-blur-md">
-                      🤖
-                  </div>
-                  <div class="flex flex-col items-start max-w-[85%]">
-                      <div class="px-4 py-3 rounded-[20px] rounded-bl-[4px] bg-white/5 border border-white/10 backdrop-blur-xl shadow-lg relative overflow-hidden">
-                          <p class="text-[16px] sm:text-[18px] font-medium leading-relaxed text-white/80 relative z-10 break-words whitespace-pre-wrap">Toca el botón azul para hablar.</p>
-                      </div>
-                  </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- CONTENEDOR GUEST -->
-          <div id="bubble-guest" class="bubble-transition apple-glass rounded-[36px] p-5 sm:p-7 relative overflow-hidden group h-auto w-full">
-            <div class="absolute inset-0 bg-gradient-to-bl from-[#FF9F0A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            
-            <div class="flex items-center justify-between mb-5 relative z-10 flex-row-reverse">
-              <div class="flex items-center gap-4 flex-row-reverse">
-                <div class="scanner-pill min-w-[56px] min-h-[36px] h-auto rounded-[18px] flex flex-wrap items-center justify-center px-3 py-1 gap-1.5 shadow-[0_0_15px_rgba(255,159,10,0.15)] relative flex-row-reverse">
-                  <div class="absolute inset-0 rounded-[18px] border border-[#FF9F0A]/20 animate-pulse pointer-events-none"></div>
-                  <span id="iconos-guest" class="text-[16px] tracking-[0.1em] text-center leading-tight drop-shadow-md">👤🇺🇸</span>
-                </div>
-                <div class="text-right">
-                  <p class="text-[10px] font-bold text-white/40 uppercase tracking-[0.15em]">Huésped</p>
-                  <p id="lang-guest" class="text-[14px] font-semibold text-transparent bg-clip-text bg-gradient-to-l from-[#FF9F0A] to-[#FF375F]">Inglés</p>
-                </div>
-              </div>
-              <div id="typing-guest" class="hidden items-center gap-1.5 opacity-80">
-                <div class="w-2 h-2 bg-gradient-to-l from-[#FF9F0A] to-[#FF375F] rounded-full animate-bounce shadow-[0_0_8px_#FF9F0A]"></div>
-                <div class="w-2 h-2 bg-gradient-to-l from-[#FF9F0A] to-[#FF375F] rounded-full animate-bounce shadow-[0_0_8px_#FF9F0A]" style="animation-delay: 0.15s"></div>
-                <div class="w-2 h-2 bg-gradient-to-l from-[#FF9F0A] to-[#FF375F] rounded-full animate-bounce shadow-[0_0_8px_#FF9F0A]" style="animation-delay: 0.3s"></div>
-              </div>
-            </div>
-            
-            <!-- Aquí se inyectan las burbujas futuristas (Alineadas a la derecha por defecto) -->
-            <div id="texto-guest" class="min-h-[48px] relative z-10 w-full transition-all duration-300 flex flex-col justify-center">
-              
-              <!-- Burbuja Inicial por defecto -->
-              <div class="flex flex-row-reverse items-end gap-2 sm:gap-3 w-full animate-bubble-in">
-                  <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[16px] shadow-sm backdrop-blur-md">
-                      🤖
-                  </div>
-                  <div class="flex flex-col items-end max-w-[85%]">
-                      <div class="px-4 py-3 rounded-[20px] rounded-br-[4px] bg-white/5 border border-white/10 backdrop-blur-xl shadow-lg relative overflow-hidden">
-                          <p class="text-[16px] sm:text-[18px] font-medium leading-relaxed text-white/80 relative z-10 break-words whitespace-pre-wrap text-right">Toca el botón naranja para responder.</p>
-                      </div>
-                  </div>
-              </div>
-
-            </div>
-          </div>
-
         </div>
 
-        <!-- ZONA DE CONTROLES -->
-        <div class="pb-12 pt-6 px-6 z-20 w-full absolute bottom-0 bg-gradient-to-t from-black via-black/90 to-transparent">
-          <div class="apple-glass rounded-[48px] p-5 flex items-center justify-between max-w-sm mx-auto relative overflow-hidden">
-            
-            <div class="flex items-center gap-2 relative">
-              <button id="btn-cancelar-staff" class="btn-cancelar opacity-0 scale-50 pointer-events-none w-14 h-14 rounded-full apple-glass-red flex items-center justify-center text-red-400 active:scale-90 absolute -top-16 left-1 z-30">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
-              
-              <div class="relative flex items-center justify-center z-10 w-20 h-20">
-                <div id="wave-staff" class="onda-voz absolute inset-0 rounded-full blur-[2px] transition-all duration-300 pointer-events-none"></div>
-                <button id="btn-grabar-staff" class="w-16 h-16 rounded-full bg-gradient-to-br from-[#5E5CE6] to-[#0A84FF] flex items-center justify-center shadow-[0_10px_30px_rgba(10,132,255,0.5)] active:scale-90 transition-transform duration-300 relative z-20 outline-none border border-white/20 cursor-pointer">
-                  <svg class="w-7 h-7 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
-                  </svg>
-                </button>
-              </div>
+        <div id="mensajes-wrapper" class="flex flex-col w-full"></div>
+        <div id="scroll-anchor" class="w-full h-[15px] shrink-0 pointer-events-none"></div>
+      </div>
+
+      <div id="footer-container" class="pie-pagina-cristal py-3 px-4 z-30 w-full absolute bottom-0 flex justify-center items-center max-w-3xl mx-auto left-0 right-0">
+        <div class="flex w-full justify-between items-center relative px-2">
+          
+          <!-- LADO IZQUIERDO (STAFF) -->
+          <div id="wrapper-staff" class="contenedor-lateral flex flex-row items-center gap-3 relative p-2 transition-all duration-500">
+            <div class="flex flex-col items-center justify-center min-w-[55px] max-w-[120px]">
+              <div id="iconos-staff" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
+              <p id="lang-staff" class="text-[10px] font-medium text-sky-400 transition-colors mt-1.5"></p>
             </div>
 
-            <div class="w-[2px] h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent z-10"></div>
-
-            <div class="flex items-center gap-2 flex-row-reverse relative">
-              <button id="btn-cancelar-guest" class="btn-cancelar opacity-0 scale-50 pointer-events-none w-14 h-14 rounded-full apple-glass-red flex items-center justify-center text-red-400 active:scale-90 absolute -top-16 right-1 z-30">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
+            <div id="container-mic-staff" class="relative flex items-center justify-center rounded-full transition-all duration-500 p-1">
+              <div id="wave-staff"></div>
               
-              <div class="relative flex items-center justify-center z-10 w-20 h-20">
-                <div id="wave-guest" class="onda-voz absolute inset-0 rounded-full blur-[2px] transition-all duration-300 pointer-events-none"></div>
-                <button id="btn-grabar-guest" class="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF375F] to-[#FF9F0A] flex items-center justify-center shadow-[0_10px_30px_rgba(255,159,10,0.5)] active:scale-90 transition-transform duration-300 relative z-20 outline-none border border-white/20 cursor-pointer">
-                  <svg class="w-7 h-7 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+              <button id="btn-grabar-staff" class="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#0066ff] flex items-center justify-center shadow-[0_8px_30px_rgba(0,102,255,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-sky-300/40">
+                <!-- Icono de colaborador de oficina / staff con alto contraste y relieve -->
+                <svg class="w-8 h-8 text-sky-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <polygon points="12,14.5 13.5,18 12,21.5 10.5,18" fill="#ffffff" opacity="0.95"/>
+                </svg>
+              </button>
 
+              <button id="btn-cancelar-staff" class="pastilla-cancelar left-[calc(100%-4px)] h-[48px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-start backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
+                <svg class="w-5 h-5 shrink-0 ml-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span class="text-[13px] font-bold tracking-wide">Cancelar</span>
+              </button>
+            </div>
           </div>
+
+          <div id="divisor" class="w-[1px] h-10 bg-white/10 rounded-full transition-opacity duration-300 shadow-sm mx-2"></div>
+
+          <!-- LADO DERECHO (GUEST) -->
+          <div id="wrapper-guest" class="contenedor-lateral flex flex-row-reverse items-center gap-3 relative p-2 transition-all duration-500">
+            <div class="flex flex-col items-center justify-center min-w-[55px] max-w-[120px]">
+              <div id="iconos-guest" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
+              <p id="lang-guest" class="text-[10px] font-medium text-purple-400 transition-colors mt-1.5"></p>
+            </div>
+
+            <div id="container-mic-guest" class="relative flex items-center justify-center rounded-full transition-all duration-500 p-1">
+              <button id="btn-cancelar-guest" class="pastilla-cancelar right-[calc(100%-4px)] h-[48px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-end backdrop-blur-xl z-10 active:bg-red-500/30 shadow-lg">
+                <span class="text-[13px] font-bold tracking-wide ml-3.5 mr-1.5">Cancelar</span>
+                <svg class="w-5 h-5 shrink-0 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+
+              <div id="wave-guest"></div>
+              
+              <button id="btn-grabar-guest" class="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#a855f7] to-[#7e22ce] flex items-center justify-center shadow-[0_8px_30px_rgba(126,34,206,0.45)] active:scale-90 transition-transform duration-200 relative z-20 border border-purple-300/40">
+                <!-- Estrella formal biselada temática Planet Hollywood con facetado premium -->
+                <svg class="w-8 h-8 drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]" viewBox="0 0 24 24">
+                  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77" fill="#f3e8ff"/>
+                  <polygon points="12,2 8.91,8.26 2,9.27 7,14.14 5.82,21.02 12,17.77" fill="#d8b4fe"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
         </div>
       </div>
-    `;
-  },
-  
-  iniciar: async () => {
-    const btnGrabarStaff = document.getElementById('btn-grabar-staff');
-    const btnGrabarGuest = document.getElementById('btn-grabar-guest');
-    const btnCancelarStaff = document.getElementById('btn-cancelar-staff');
-    const btnCancelarGuest = document.getElementById('btn-cancelar-guest');
-    
-    const waveStaff = document.getElementById('wave-staff');
-    const waveGuest = document.getElementById('wave-guest');
+    </div>
+  `,
 
-    const bubbleStaff = document.getElementById('bubble-staff');
-    const bubbleGuest = document.getElementById('bubble-guest');
-    const typingStaff = document.getElementById('typing-staff');
-    const typingGuest = document.getElementById('typing-guest');
-    const textoStaff = document.getElementById('texto-staff');
-    const textoGuest = document.getElementById('texto-guest');
-    const langStaff = document.getElementById('lang-staff');
-    const langGuest = document.getElementById('lang-guest');
-    const iconosStaff = document.getElementById('iconos-staff');
-    const iconosGuest = document.getElementById('iconos-guest');
+  generarBurbujaHtml: (hablantes, rol, textoTraducidoCompleto, isoDestino, iconoPersona, audioBase64) => {
+    if (!hablantes || hablantes.length === 0) return "";
     
-    const WORKER_URL = "https://asistente-backend.auraradio-cloud.workers.dev/";
+    const esStaff = rol === "staff";
+    const alineacion = esStaff ? "justify-start" : "justify-end";
+    const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
     
-    let memoriaIdiomas = {
-      staff: { iso: "es", nombre: "Español", bandera: "🇲🇽" },
-      guest: { iso: "en", nombre: "Inglés", bandera: "🇺🇸" }
+    return hablantes.map((h) => {
+      const emojiBandera = `${h.icono_persona || ''}${h.bandera || ''}`;
+      const nombreIdioma = h.nombre_idioma || 'Idioma detectado';
+      const textoPronunciar = (h.frase_traducida || h.texto_traducida || textoTraducidoCompleto || "").replace(/"/g, '&quot;');
+      const isoPronunciar = h.iso || isoDestino || 'en';
+      const iconoFinal = h.icono_persona || iconoPersona || '🗣️';
+      const audioAttr = audioBase64 || '';
+
+      const tagIdioma = emojiBandera ? `
+        <div class="flex items-center gap-1.5 mb-2 opacity-90">
+          <span class="text-[12px] bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm shadow-sm border border-white/10">${emojiBandera}</span>
+          <span class="text-[9px] font-bold tracking-widest uppercase text-white/50">${nombreIdioma}</span>
+        </div>
+      ` : '';
+
+      return `
+      <div class="flex ${alineacion} w-full my-[15px] shrink-0">
+        <div class="max-w-[88%] sm:max-w-[80%] rounded-[24px] px-5 py-4 ${claseBurbuja} relative group">
+          ${tagIdioma}
+          <p class="text-[14px] sm:text-[15px] font-normal leading-snug text-white/50 break-words whitespace-pre-wrap">${h.frase_original || h.texto_original || "..."}</p>
+          <div class="h-[1px] w-full bg-gradient-to-r from-white/5 via-white/20 to-white/5 my-2.5 rounded-full"></div>
+          
+          <div class="flex items-end justify-between gap-3">
+            <p class="text-[19px] sm:text-[21px] font-bold leading-tight text-white drop-shadow-md break-words whitespace-pre-wrap tracking-tight flex-1">${h.frase_traducida || h.texto_traducida || "..."}</p>
+            
+            <button 
+              type="button"
+              class="btn-repetir-voz p-2 -mr-1 -mb-1 rounded-full bg-white/10 hover:bg-white/20 active:scale-85 transition-all text-white/80 shrink-0"
+              data-texto="${textoPronunciar}"
+              data-iso="${isoPronunciar}"
+              data-icono="${iconoFinal}"
+              data-audio="${audioAttr}"
+              title="Escuchar de nuevo"
+            >
+              <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  generarHtmlEscribiendo: (rol, idUnico) => {
+    const esStaff = rol === "staff";
+    const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
+    return `
+      <div id="${idUnico}" class="flex ${esStaff ? 'justify-start' : 'justify-end'} w-full my-[15px] shrink-0">
+        <div class="max-w-[85%] rounded-[24px] px-5 py-4 ${claseBurbuja} flex items-center gap-1.5 h-[56px]">
+          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0s"></div>
+          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.2s"></div>
+          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.4s"></div>
+        </div>
+      </div>`;
+  },
+
+  generarMensajeSistemaHtml: (mensaje, esError = false) => {
+    const colorClase = esError 
+      ? "bg-red-500/20 text-red-400 border-red-500/30" 
+      : "bg-white/10 text-white/70 border-white/5";
+    return `
+      <div class="flex w-full justify-center my-1 shrink-0">
+        <div class="${colorClase} border px-4 py-1 rounded-full text-[11px] font-medium tracking-wide backdrop-blur-md shadow-sm">
+          ${mensaje}
+        </div>
+      </div>`;
+  },
+
+  generarPastillaReintentarHtml: (idPastilla) => `
+    <div id="${idPastilla}" class="flex w-full justify-center my-1 shrink-0">
+      <div class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-4 py-1.5 rounded-full text-[11px] font-medium tracking-wide backdrop-blur-md shadow-md flex items-center gap-2">
+        <span>Conexión lenta sin respuesta</span>
+        <button type="button" class="btn-ejecutar-reintento underline font-bold hover:text-white transition-colors cursor-pointer">
+          Reintentar
+        </button>
+      </div>
+    </div>
+  `
+};
+
+/* ==========================================================================
+   MODULO 3: ANIMACIÓN TIPO MEDUSA BIOLUMINISCENTE
+   ========================================================================== */
+const moduloAnimacionMedusa = {
+  idAnimacion: null,
+  escalaActual: 1,
+  faseRespiracion: 0,
+
+  iniciarMedusa: function(analizador, matrizFrecuencia, elementoOnda, botonActivo) {
+    if (!elementoOnda) return;
+
+    this.escalaActual = 1;
+    this.faseRespiracion = 0;
+    elementoOnda.style.opacity = "1";
+    elementoOnda.style.display = "block";
+
+    const animarMedusa = () => {
+      this.idAnimacion = requestAnimationFrame(animarMedusa);
+
+      let promedioVoz = 0;
+      if (analizador && matrizFrecuencia) {
+        analizador.getByteFrequencyData(matrizFrecuencia);
+        const bandasVoz = Math.min(matrizFrecuencia.length, 32);
+        let suma = 0;
+        for (let i = 0; i < bandasVoz; i++) suma += matrizFrecuencia[i];
+        promedioVoz = suma / bandasVoz;
+      }
+
+      this.faseRespiracion += 0.05 + (promedioVoz / 800);
+      
+      const r1 = 50 + Math.sin(this.faseRespiracion * 1.2) * 16;
+      const r2 = 50 + Math.cos(this.faseRespiracion * 0.9) * 14;
+      const r3 = 50 + Math.sin(this.faseRespiracion * 1.5 + 2) * 15;
+      const r4 = 50 + Math.cos(this.faseRespiracion * 1.1 + 1) * 18;
+
+      elementoOnda.style.borderRadius = `${r1}% ${100 - r1}% ${r2}% ${100 - r2}% / ${r3}% ${r4}% ${100 - r4}% ${100 - r3}%`;
+
+      let escalaObjetivo = 1.05 + (Math.sin(this.faseRespiracion) * 0.04);
+      if (promedioVoz > 3) {
+        const factorNormalizado = (promedioVoz - 3) / 100;
+        escalaObjetivo = Math.min(1.48, 1.08 + (factorNormalizado * 0.40));
+      }
+
+      this.escalaActual += (escalaObjetivo - this.escalaActual) * 0.32;
+      elementoOnda.style.transform = `scale(${this.escalaActual.toFixed(3)}) rotate(${(this.faseRespiracion * 12).toFixed(1)}deg)`;
+
+      if (botonActivo) {
+        const contraccionBoton = 1 - (this.escalaActual - 1) * 0.08;
+        botonActivo.style.transform = `scale(${contraccionBoton.toFixed(3)})`;
+      }
     };
 
-    let grabandoRol = null; 
+    animarMedusa();
+  },
+
+  detenerMedusa: function(elementoOnda, botonActivo) {
+    if (this.idAnimacion) {
+      cancelAnimationFrame(this.idAnimacion);
+      this.idAnimacion = null;
+    }
+    
+    if (elementoOnda) {
+      elementoOnda.style.opacity = "0";
+      elementoOnda.style.transform = "scale(0)";
+      elementoOnda.style.borderRadius = "9999px";
+    }
+
+    if (botonActivo) {
+      botonActivo.style.transform = "";
+      botonActivo.style.animation = "none";
+    }
+
+    this.escalaActual = 1;
+    this.faseRespiracion = 0;
+  }
+};
+
+/* ==========================================================================
+   MODULO 4: SÍNTESIS Y REPRODUCCIÓN DE VOZ (CONTROL TOTAL DE AUDIO)
+   ========================================================================== */
+const moduloSintesisVoz = {
+  vocesDisponibles: [],
+  motorIniciado: false,
+  reproductorAudioActivo: null,
+
+  cargarVoces: function() {
+    if ('speechSynthesis' in window) {
+      this.vocesDisponibles = window.speechSynthesis.getVoices();
+    }
+  },
+
+  iniciarMotorSilencioso: function() {
+    if (!this.motorIniciado && 'speechSynthesis' in window) {
+      const locucionSilenciosa = new SpeechSynthesisUtterance('');
+      locucionSilenciosa.volume = 0;
+      window.speechSynthesis.speak(locucionSilenciosa);
+      this.motorIniciado = true;
+    }
+  },
+
+  detenerCualquierAudio: function() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    if (this.reproductorAudioActivo) {
+      this.reproductorAudioActivo.pause();
+      this.reproductorAudioActivo.currentTime = 0;
+      this.reproductorAudioActivo = null;
+    }
+  },
+
+  reproducirTextoVozNativa: function(texto, codigoIso, iconoDominante) {
+    if (!('speechSynthesis' in window)) return;
+
+    this.detenerCualquierAudio();
+    const locucion = new SpeechSynthesisUtterance(texto);
+    
+    const mapaIdiomas = {
+      'es': 'es-MX',
+      'en': 'en-US',
+      'zh': 'zh-CN',
+      'fr': 'fr-FR',
+      'de': 'de-DE',
+      'it': 'it-IT',
+      'pt': 'pt-BR',
+      'ja': 'ja-JP',
+      'ru': 'ru-RU',
+      'ko': 'ko-KR'
+    };
+    
+    locucion.lang = mapaIdiomas[(codigoIso || 'en').toLowerCase()] || codigoIso;
+    locucion.rate = 1.05;
+
+    if (this.vocesDisponibles.length === 0) this.cargarVoces();
+    
+    const vocesIdioma = this.vocesDisponibles.filter(v => v.lang.toLowerCase().startsWith((codigoIso || 'en').toLowerCase()));
+    
+    if (vocesIdioma.length > 0) {
+      const esHombre = ['👨', '👦', '👨🏽‍💼'].includes(iconoDominante);
+      let vozElegida = vocesIdioma.find(v => (esHombre ? /(male|hombre|alvaro|jorge|carlos)/i : /(female|mujer|monica|paulina|helena)/i).test(v.name));
+      
+      if (!vozElegida) {
+        vozElegida = vocesIdioma.find(v => v.name.includes('Google') || v.name.includes('Natural')) || vocesIdioma[0];
+      }
+      locucion.voice = vozElegida;
+    }
+    
+    window.speechSynthesis.speak(locucion);
+  },
+
+  reproducirAudioOTexto: function(texto, codigoIso, iconoDominante, audioBase64FallBack) {
+    this.detenerCualquierAudio();
+
+    if (audioBase64FallBack) {
+      try {
+        const audio = new Audio("data:audio/mp3;base64," + audioBase64FallBack);
+        this.reproductorAudioActivo = audio;
+        
+        audio.onended = () => { this.reproductorAudioActivo = null; };
+        audio.onerror = () => {
+          this.reproductorAudioActivo = null;
+          this.reproducirTextoVozNativa(texto, codigoIso, iconoDominante);
+        };
+
+        audio.play().catch(() => {
+          this.reproductorAudioActivo = null;
+          this.reproducirTextoVozNativa(texto, codigoIso, iconoDominante);
+        });
+        return;
+      } catch (e) {
+        this.reproductorAudioActivo = null;
+      }
+    }
+    this.reproducirTextoVozNativa(texto, codigoIso, iconoDominante);
+  }
+};
+
+/* ==========================================================================
+   MODULO 5: SERVICIO DE RED Y ENVÍO CON ETIQUETA CORRELACIONAL
+   ========================================================================== */
+const moduloServicioTraduccion = {
+  URL_SERVICIO: "https://asistente-backend.auraradio-cloud.workers.dev/",
+
+  ejecutarFetch: async (blobAudio, rol, idiomaContrario, etiquetaAudio, senalAborto) => {
+    const extension = blobAudio.type.includes('mp4') ? 'm4a' : 'webm';
+    const formulario = new FormData();
+    formulario.append('audio', blobAudio, `audio.${extension}`);
+    formulario.append('rol', rol);
+    formulario.append('idiomaContrario', idiomaContrario);
+    formulario.append('etiqueta', etiquetaAudio);
+
+    const respuesta = await fetch(moduloServicioTraduccion.URL_SERVICIO, { 
+      method: 'POST', 
+      body: formulario,
+      signal: senalAborto
+    });
+
+    if (!respuesta.ok) throw new Error("HTTP " + respuesta.status);
+    const data = await respuesta.json();
+    
+    if (!data.etiqueta) data.etiqueta = etiquetaAudio;
+    return data;
+  }
+};
+
+/* ==========================================================================
+   MODULO 6: CONTROLADOR PRINCIPAL (EXPORT DEFAULT)
+   ========================================================================== */
+export default {
+  html: () => moduloPlantillasInterfaz.generarEstructuraPrincipal(),
+  
+  iniciar: async () => {
+    const dom = {
+      btnGrabarStaff: document.getElementById('btn-grabar-staff'),
+      btnGrabarGuest: document.getElementById('btn-grabar-guest'),
+      btnCancelarStaff: document.getElementById('btn-cancelar-staff'),
+      btnCancelarGuest: document.getElementById('btn-cancelar-guest'),
+      waveStaff: document.getElementById('wave-staff'),
+      waveGuest: document.getElementById('wave-guest'),
+      wrapperStaff: document.getElementById('wrapper-staff'),
+      wrapperGuest: document.getElementById('wrapper-guest'),
+      containerMicStaff: document.getElementById('container-mic-staff'),
+      containerMicGuest: document.getElementById('container-mic-guest'),
+      divisor: document.getElementById('divisor'),
+      chatContainer: document.getElementById('chat-container'),
+      mensajesWrapper: document.getElementById('mensajes-wrapper'),
+      scrollAnchor: document.getElementById('scroll-anchor'),
+      langStaff: document.getElementById('lang-staff'),
+      langGuest: document.getElementById('lang-guest'),
+      iconosStaff: document.getElementById('iconos-staff'),
+      iconosGuest: document.getElementById('iconos-guest')
+    };
+
+    let state = {
+      grabandoRol: null,
+      canceladoManualmente: false,
+      volumenMaximo: 0,
+      tiempoInicio: 0,
+      idEscribiendo: null,
+      idPastillaReintento: null,
+      etiquetaUltimaValida: null,
+      contadorTurnos: 0,
+      etiquetasProcesadas: new Set(),
+      ultimoAudioFallido: null,
+      memoriaIdiomas: {
+        staff: { iso: "es" },
+        guest: { iso: "en" }
+      }
+    };
+
     let mediaRecorder = null;
     let audioChunks = [];
-    let timeoutReset = null;
-    let vocesDisponibles = [];
-    let canceladoManualmente = false;
-    let motorVozIniciado = false;
-    
     let audioCtx = null;
     let analyser = null;
     let dataArray = null;
-    let animacionOnda = null;
-    let volumenMaximoDetectado = 0;
-    let tiempoInicio = 0;
 
-    const cargarVoces = () => { vocesDisponibles = window.speechSynthesis.getVoices(); };
-    cargarVoces();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) window.speechSynthesis.onvoiceschanged = cargarVoces;
+    moduloSintesisVoz.cargarVoces();
+    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = () => moduloSintesisVoz.cargarVoces();
+    }
 
-    const iniciarMotorVoz = () => {
-      if (!motorVozIniciado && 'speechSynthesis' in window) {
-        const silentUtterance = new SpeechSynthesisUtterance('');
-        silentUtterance.volume = 0;
-        window.speechSynthesis.speak(silentUtterance);
-        motorVozIniciado = true;
+    const scrollToBottom = () => {
+      requestAnimationFrame(() => {
+        if (dom.chatContainer) {
+          dom.chatContainer.scrollTop = dom.chatContainer.scrollHeight;
+        }
+      });
+    };
+
+    const inyectarSistema = (mensaje, esError = false) => {
+      const contenedor = dom.mensajesWrapper || dom.chatContainer;
+      const html = moduloPlantillasInterfaz.generarMensajeSistemaHtml(mensaje, esError);
+      contenedor.insertAdjacentHTML('beforeend', html);
+      scrollToBottom();
+    };
+
+    const limpiarPastillaReintento = () => {
+      if (state.idPastillaReintento) {
+        const elemento = document.getElementById(state.idPastillaReintento);
+        if (elemento) elemento.remove();
+        state.idPastillaReintento = null;
       }
     };
-
-    // ==============================================================================
-    // GENERADOR DE BURBUJAS ESTILO WHATSAPP/IMESSAGE ULTRA FUTURISTA
-    // ==============================================================================
-    const renderizarDialogo = (hablantes, mostrarTraduccion, alineacionRight, tema) => {
-      if (!hablantes || hablantes.length === 0) return "";
-      
-      return '<div class="flex flex-col gap-4 w-full mt-2">' + hablantes.map((h, index) => {
-        const texto = mostrarTraduccion ? (h.frase_traducida || h.texto_traducido || "...") : (h.frase_original || h.texto_original || "...");
-        const delay = index * 0.15; // Efecto cascada si hay varios hablando
-        
-        // Define los colores de la burbuja dependiendo de si está en la zona Staff (Azul) o Guest (Naranja)
-        const bgClases = tema === "staff" 
-            ? "bg-gradient-to-br from-[#0A84FF]/20 to-[#5E5CE6]/20 border-[#0A84FF]/30" 
-            : "bg-gradient-to-bl from-[#FF9F0A]/20 to-[#FF375F]/20 border-[#FF9F0A]/30";
-
-        if (alineacionRight) {
-          // Burbuja alineada a la DERECHA (Sent message)
-          return `
-          <div class="flex flex-row-reverse items-end gap-2 sm:gap-3 w-full animate-bubble-in" style="animation-delay: ${delay}s; opacity: 0; animation-fill-mode: forwards;">
-              <div class="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20 text-[16px] shadow-sm backdrop-blur-md z-10">
-                  ${h.icono_persona}
-              </div>
-              <div class="flex flex-col items-end max-w-[85%]">
-                  <span class="text-[9px] sm:text-[10px] text-white/40 mr-1 mb-1 font-semibold tracking-widest uppercase">${h.nombre_idioma}</span>
-                  <div class="px-4 sm:px-5 py-3 sm:py-4 rounded-[22px] rounded-br-[6px] ${bgClases} border backdrop-blur-xl shadow-lg relative overflow-hidden">
-                      <div class="absolute inset-0 bg-white/5 pointer-events-none"></div>
-                      <p class="text-[16px] sm:text-[18px] font-medium leading-relaxed text-white/95 relative z-10 break-words whitespace-pre-wrap text-right">${texto}</p>
-                  </div>
-              </div>
-          </div>`;
-        } else {
-          // Burbuja alineada a la IZQUIERDA (Received message)
-          return `
-          <div class="flex flex-row items-end gap-2 sm:gap-3 w-full animate-bubble-in" style="animation-delay: ${delay}s; opacity: 0; animation-fill-mode: forwards;">
-              <div class="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20 text-[16px] shadow-sm backdrop-blur-md z-10">
-                  ${h.icono_persona}
-              </div>
-              <div class="flex flex-col items-start max-w-[85%]">
-                  <span class="text-[9px] sm:text-[10px] text-white/40 ml-1 mb-1 font-semibold tracking-widest uppercase">${h.nombre_idioma}</span>
-                  <div class="px-4 sm:px-5 py-3 sm:py-4 rounded-[22px] rounded-bl-[6px] ${bgClases} border backdrop-blur-xl shadow-lg relative overflow-hidden">
-                      <div class="absolute inset-0 bg-white/5 pointer-events-none"></div>
-                      <p class="text-[16px] sm:text-[18px] font-medium leading-relaxed text-white/95 relative z-10 break-words whitespace-pre-wrap text-left">${texto}</p>
-                  </div>
-              </div>
-          </div>`;
-        }
-      }).join('') + '</div>';
-    };
-    // ==============================================================================
 
     const setEstadoVisual = (estado, rolFuente = null) => {
-      bubbleStaff.className = "bubble-transition apple-glass rounded-[36px] p-5 sm:p-7 relative overflow-hidden group h-auto w-full";
-      bubbleGuest.className = "bubble-transition apple-glass rounded-[36px] p-5 sm:p-7 relative overflow-hidden group h-auto w-full flex-row-reverse";
-      
-      typingStaff.classList.add('hidden');
-      typingGuest.classList.add('hidden');
-      typingStaff.classList.remove('flex');
-      typingGuest.classList.remove('flex');
-
-      btnCancelarStaff.classList.replace('opacity-100', 'opacity-0');
-      btnCancelarStaff.classList.replace('scale-100', 'scale-50');
-      btnCancelarStaff.classList.add('pointer-events-none');
-      btnCancelarGuest.classList.replace('opacity-100', 'opacity-0');
-      btnCancelarGuest.classList.replace('scale-100', 'scale-50');
-      btnCancelarGuest.classList.add('pointer-events-none');
-      
-      waveStaff.style.transform = "scale(1)";
-      waveGuest.style.transform = "scale(1)";
-      waveStaff.classList.remove('onda-activa-staff');
-      waveGuest.classList.remove('onda-activa-guest');
-
-      clearTimeout(timeoutReset);
-
       if (estado === "grabando") {
+        dom.divisor.classList.add('opacity-0');
+        
         if (rolFuente === "staff") {
-          bubbleStaff.classList.add('scale-105', 'border-[#0A84FF]/40', 'bg-[#0A84FF]/10');
-          bubbleGuest.classList.add('scale-95', 'opacity-30', 'blur-[4px]');
-          btnCancelarStaff.classList.replace('opacity-0', 'opacity-100');
-          btnCancelarStaff.classList.replace('scale-50', 'scale-100');
-          btnCancelarStaff.classList.remove('pointer-events-none');
-          waveStaff.classList.add('onda-activa-staff'); 
+          dom.wrapperGuest.classList.add('lateral-oculto');
+          dom.btnCancelarStaff.classList.add('activo'); 
         } else {
-          bubbleGuest.classList.add('scale-105', 'border-[#FF9F0A]/40', 'bg-[#FF9F0A]/10');
-          bubbleStaff.classList.add('scale-95', 'opacity-30', 'blur-[4px]');
-          btnCancelarGuest.classList.replace('opacity-0', 'opacity-100');
-          btnCancelarGuest.classList.replace('scale-50', 'scale-100');
-          btnCancelarGuest.classList.remove('pointer-events-none');
-          waveGuest.classList.add('onda-activa-guest'); 
+          dom.wrapperStaff.classList.add('lateral-oculto');
+          dom.btnCancelarGuest.classList.add('activo'); 
         }
-      } 
-      else if (estado === "procesando") {
-        if (rolFuente === "staff") {
-          typingGuest.classList.remove('hidden');
-          typingGuest.classList.add('flex');
-          bubbleGuest.classList.add('border-[#FF9F0A]/30', 'bg-[#FF9F0A]/5');
-        } else {
-          typingStaff.classList.remove('hidden');
-          typingStaff.classList.add('flex');
-          bubbleStaff.classList.add('border-[#0A84FF]/30', 'bg-[#0A84FF]/5');
+      } else {
+        dom.divisor.classList.remove('opacity-0');
+        dom.wrapperStaff.classList.remove('lateral-oculto');
+        dom.wrapperGuest.classList.remove('lateral-oculto');
+        
+        dom.btnCancelarStaff.classList.remove('activo');
+        dom.btnCancelarGuest.classList.remove('activo');
+
+        moduloAnimacionMedusa.detenerMedusa(dom.waveStaff, dom.btnGrabarStaff);
+        moduloAnimacionMedusa.detenerMedusa(dom.waveGuest, dom.btnGrabarGuest);
+        
+        if (estado === "procesando") {
+          const id = `typing-${Date.now()}`;
+          state.idEscribiendo = id;
+          const contenedor = dom.mensajesWrapper || dom.chatContainer;
+          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarHtmlEscribiendo(rolFuente, id));
+          scrollToBottom();
         }
-      }
-      else if (estado === "recibiendo") {
-        timeoutReset = setTimeout(() => { setEstadoVisual("idle"); }, 4000);
       }
     };
 
-    const reproducirVozInteligente = (texto, iso, iconoDominante, audioBase64FallBack) => {
-      if (audioBase64FallBack) {
-        try {
-          const reproductor = new Audio("data:audio/mp3;base64," + audioBase64FallBack);
-          reproductor.play().catch(e => {
-            console.warn("Autoplay bloqueado. Pasando a voz local...");
-            usarVozNativa(texto, iso, iconoDominante);
-          });
-          return;
-        } catch(e) { console.error("Fallo audio base64:", e); }
-      }
-      usarVozNativa(texto, iso, iconoDominante);
-    };
-
-    const usarVozNativa = (texto, iso, iconoDominante) => {
-      if ('speechSynthesis' in window) {
-        const synth = window.speechSynthesis;
-        synth.cancel();
-
-        let vocesFrescas = synth.getVoices();
-        if (vocesFrescas.length > 0) vocesDisponibles = vocesFrescas;
-
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = iso === 'es' ? 'es-MX' : (iso === 'en' ? 'en-US' : iso);
-        utterance.rate = 1.05;
-
-        let vocesIdioma = vocesDisponibles.filter(v => v.lang.toLowerCase().startsWith(iso.toLowerCase()));
-        let vozSeleccionada = null;
-
-        if (vocesIdioma.length > 0) {
-          const esHombre = iconoDominante === '👨' || iconoDominante === '👦';
-          if (esHombre) {
-            vozSeleccionada = vocesIdioma.find(v => /(male|hombre|alvaro|jorge|carlos)/i.test(v.name));
-          } else {
-            vozSeleccionada = vocesIdioma.find(v => /(female|mujer|monica|paulina|helena)/i.test(v.name));
-          }
-          if (!vozSeleccionada) vozSeleccionada = vocesIdioma.find(v => v.name.includes('Google') || v.name.includes('Natural')) || vocesIdioma[0];
-          utterance.voice = vozSeleccionada;
-        }
-
-        synth.speak(utterance);
-      }
-    };
-
-    const enviarAudioAlServidor = async (audioBlob, rol) => {
+    // --------------------------------------------------------------------------
+    // PIPELINE DE ENVÍO: 0s, 2.5s, 8s Y CORTE A LOS 15s CON REINTENTO
+    // --------------------------------------------------------------------------
+    const enviarAudioAlServidor = (audioBlob, rol) => {
+      limpiarPastillaReintento();
       setEstadoVisual("procesando", rol);
-      try {
-        const formData = new FormData();
-        const extension = audioBlob.type.includes('mp4') ? 'm4a' : 'webm';
-        formData.append('audio', audioBlob, `grabacion.${extension}`);
-        formData.append('rol', rol);
-        formData.append('idiomaContrario', rol === "staff" ? memoriaIdiomas.guest.iso : memoriaIdiomas.staff.iso);
 
-        const respuesta = await fetch(WORKER_URL, { method: 'POST', body: formData });
-        if (!respuesta.ok) throw new Error("Error HTTP " + respuesta.status);
-        
-        const data = await respuesta.json();
-        
-        if (data.debug_error) {
-            console.error("%c🚨 ERROR FORENSE DE GEMINI/BACKEND 🚨", "color: white; background: red; font-size: 16px; font-weight: bold; padding: 4px;");
-            console.error("Detalle exacto del error:", data.debug_error);
+      const etiquetaActual = `etiqueta_${Date.now()}_${++state.contadorTurnos}`;
+      state.etiquetaUltimaValida = etiquetaActual;
+
+      state.ultimoAudioFallido = { blob: audioBlob, rol: rol };
+
+      const isoContrario = rol === "staff" 
+        ? state.memoriaIdiomas.guest.iso 
+        : state.memoriaIdiomas.staff.iso;
+
+      const controladores = [new AbortController(), new AbortController(), new AbortController()];
+      const temporizadores = [];
+      let respuestaProcesada = false;
+
+      const procesarRespuestaConEtiqueta = (data, numIntento) => {
+        if (respuestaProcesada) return;
+        if (state.etiquetasProcesadas.has(data.etiqueta)) return;
+        if (data.etiqueta !== state.etiquetaUltimaValida) return;
+
+        respuestaProcesada = true;
+        state.etiquetasProcesadas.add(data.etiqueta);
+        state.ultimoAudioFallido = null;
+
+        temporizadores.forEach(t => clearTimeout(t));
+
+        controladores.forEach((ctrl, idx) => {
+          if (idx !== (numIntento - 1)) {
+            try { ctrl.abort(); } catch (e) { }
+          }
+        });
+
+        if (state.idEscribiendo) {
+          const loader = document.getElementById(state.idEscribiendo);
+          if (loader) loader.remove();
+          state.idEscribiendo = null;
         }
 
-        const dominante = data.hablantes[0];
-        const grupoVisual = data.hablantes.map(h => `${h.icono_persona}${h.bandera}`).join("  ");
-        const multiNombre = data.hablantes.length > 1 ? dominante.nombre_idioma + " (+)" : dominante.nombre_idioma;
-        
-        if (rol === "staff") {
-          memoriaIdiomas.staff = { iso: dominante.iso, nombre: dominante.nombre_idioma, bandera: dominante.bandera };
-          iconosStaff.textContent = grupoVisual;
-          langStaff.textContent = multiNombre;
-          
-          // Staff dice algo (Original, Alineado Derecha, Tema Staff)
-          textoStaff.innerHTML = renderizarDialogo(data.hablantes, false, true, "staff");
-          
-          iconosGuest.textContent = `${memoriaIdiomas.guest.bandera}`;
-          langGuest.textContent = data.nombre_destino;
-          // Guest lo escucha traducido (Traducido, Alineado Izquierda, Tema Guest)
-          textoGuest.innerHTML = renderizarDialogo(data.hablantes, true, false, "guest");
-        } else {
-          memoriaIdiomas.guest = { iso: dominante.iso, nombre: dominante.nombre_idioma, bandera: dominante.bandera };
-          iconosGuest.textContent = grupoVisual;
-          langGuest.textContent = multiNombre;
-          
-          // Guest dice algo (Original, Alineado Derecha, Tema Guest)
-          textoGuest.innerHTML = renderizarDialogo(data.hablantes, false, true, "guest");
-          
-          iconosStaff.textContent = `${memoriaIdiomas.staff.bandera}`;
-          langStaff.textContent = data.nombre_destino;
-          // Staff lo escucha traducido (Traducido, Alineado Izquierda, Tema Staff)
-          textoStaff.innerHTML = renderizarDialogo(data.hablantes, true, false, "staff");
+        const dominante = data.hablantes && data.hablantes.length > 0 ? data.hablantes[0] : null;
+        const esSilencio = !dominante || 
+                           (data.texto_traducido && data.texto_traducido.includes("No se detectó")) || 
+                           data.debug_error || 
+                           dominante.nombre_idioma === "Silencio" || 
+                           dominante.nombre_idioma === "Error";
+
+        if (!esSilencio) {
+          const iconosUnicos = [...new Set(data.hablantes.map(h => h.icono_persona).filter(Boolean))];
+          const htmlIconos = iconosUnicos.map((ico, idx) => `<span class="animacion-rostro-pop" style="animation-delay: ${idx * 0.1}s">${ico}</span>`).join('');
+          const multiNombre = data.hablantes.length > 1 ? dominante.nombre_idioma + " (+)" : dominante.nombre_idioma;
+
+          if (rol === "staff") {
+            state.memoriaIdiomas.staff.iso = dominante.iso;
+            if (htmlIconos) dom.iconosStaff.innerHTML = htmlIconos;
+            dom.langStaff.textContent = multiNombre;
+            if (data.nombre_destino && data.nombre_destino !== "Silencio") dom.langGuest.textContent = data.nombre_destino;
+          } else {
+            state.memoriaIdiomas.guest.iso = dominante.iso;
+            if (htmlIconos) dom.iconosGuest.innerHTML = htmlIconos;
+            dom.langGuest.textContent = multiNombre;
+            if (data.nombre_destino && data.nombre_destino !== "Silencio") dom.langStaff.textContent = data.nombre_destino;
+          }
         }
 
-        setEstadoVisual("recibiendo", rol);
-        
-        if (data.texto_traducido.includes("No se detectó voz") || data.debug_error) {
-           setTimeout(() => setEstadoVisual("idle"), 3000);
-           return; 
-        }
-
-        reproducirVozInteligente(data.texto_traducido, data.iso_destino, dominante.icono_persona, data.audio_voz);
-
-      } catch (error) {
-        console.error("%c🚨 ERROR DE RED/FETCH 🚨", "color: white; background: orange; font-size: 14px;", error.message);
-        
-        // Bloque de error estilo chat futurista
-        const errorHtml = `
-          <div class="flex flex-row items-center gap-2 w-full animate-bubble-in mt-2 justify-center">
-              <div class="px-4 py-3 rounded-full bg-red-500/10 border border-red-500/30 backdrop-blur-md shadow-lg">
-                  <p class="text-[16px] font-medium text-red-400">Error de red, intenta de nuevo.</p>
-              </div>
-          </div>`;
-          
-        if (rol === "staff") textoStaff.innerHTML = errorHtml;
-        else textoGuest.innerHTML = errorHtml;
+        const contenedor = dom.mensajesWrapper || dom.chatContainer;
+        contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarBurbujaHtml(
+          data.hablantes, 
+          rol, 
+          data.texto_traducido, 
+          data.iso_destino, 
+          dominante ? dominante.icono_persona : null, 
+          data.audio_voz
+        ));
+        scrollToBottom();
         setEstadoVisual("idle");
-      }
-    };
 
-    const renderizarOndas = () => {
-      if (!grabandoRol || !analyser) return;
-      animacionOnda = requestAnimationFrame(renderizarOndas);
-      analyser.getByteFrequencyData(dataArray);
-      
-      let suma = 0;
-      for (let i = 0; i < dataArray.length; i++) suma += dataArray[i];
-      let promedio = suma / dataArray.length;
-      
-      if (promedio > volumenMaximoDetectado) volumenMaximoDetectado = promedio;
+        if (!esSilencio) {
+          moduloSintesisVoz.reproducirAudioOTexto(data.texto_traducido, data.iso_destino, dominante.icono_persona, data.audio_voz);
+        }
+      };
 
-      let escala = 1 + (promedio / 110); 
-      if (escala > 1.9) escala = 1.9;
+      const dispararIntento = (numIntento) => {
+        if (respuestaProcesada || state.etiquetaUltimaValida !== etiquetaActual) return;
 
-      if (grabandoRol === 'staff') waveStaff.style.transform = `scale(${escala})`;
-      else waveGuest.style.transform = `scale(${escala})`;
+        moduloServicioTraduccion
+          .ejecutarFetch(audioBlob, rol, isoContrario, etiquetaActual, controladores[numIntento - 1].signal)
+          .then(data => procesarRespuestaConEtiqueta(data, numIntento))
+          .catch(err => {
+            if (err.name === 'AbortError') return;
+          });
+      };
+
+      // 1. Intento 1: Inmediato (0s)
+      dispararIntento(1);
+
+      // 2. Intento 2: A los 2.5s
+      temporizadores.push(setTimeout(() => {
+        dispararIntento(2);
+      }, 2500));
+
+      // 3. Intento 3: A los 8s
+      temporizadores.push(setTimeout(() => {
+        dispararIntento(3);
+      }, 8000));
+
+      // 4. Límite: 15s
+      temporizadores.push(setTimeout(() => {
+        if (!respuestaProcesada && state.etiquetaUltimaValida === etiquetaActual) {
+          controladores.forEach(c => { try { c.abort(); } catch (e) { } });
+
+          if (state.idEscribiendo) {
+            const loader = document.getElementById(state.idEscribiendo);
+            if (loader) loader.remove();
+            state.idEscribiendo = null;
+          }
+          setEstadoVisual("idle");
+
+          state.idPastillaReintento = `reintento-${Date.now()}`;
+          const contenedor = dom.mensajesWrapper || dom.chatContainer;
+          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+          scrollToBottom();
+        }
+      }, 15000));
     };
 
     const iniciarGrabacion = async (rol) => {
-      iniciarMotorVoz();
-      window.speechSynthesis.cancel(); 
-      canceladoManualmente = false;
+      moduloSintesisVoz.detenerCualquierAudio();
+      moduloSintesisVoz.iniciarMotorSilencioso();
+      
+      state.canceladoManualmente = false;
+      limpiarPastillaReintento();
+
+      state.etiquetaUltimaValida = null;
+
+      if (state.idEscribiendo) {
+        const loader = document.getElementById(state.idEscribiendo);
+        if (loader) loader.remove();
+        state.idEscribiendo = null;
+      }
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
         
         const source = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
+        analyser.fftSize = 128;
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         
-        volumenMaximoDetectado = 0;
-        tiempoInicio = Date.now();
+        state.volumenMaximo = 0;
+        state.tiempoInicio = Date.now();
 
-        let mimeType = '';
-        if (typeof MediaRecorder.isTypeSupported === 'function') {
-          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
-          else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
-          else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
-        }
+        const mimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+        const mimeType = mimeTypes.find(t => MediaRecorder.isTypeSupported(t)) || '';
 
         mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-        audioChunks = [];
+        audioChunks = []; 
         
-        mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
 
         mediaRecorder.onstop = () => {
-          cancelAnimationFrame(animacionOnda);
-          waveStaff.style.transform = "scale(1)";
-          waveGuest.style.transform = "scale(1)";
+          const elementoOnda = state.grabandoRol === 'staff' ? dom.waveStaff : dom.waveGuest;
+          const botonActivo = state.grabandoRol === 'staff' ? dom.btnGrabarStaff : dom.btnGrabarGuest;
+          moduloAnimacionMedusa.detenerMedusa(elementoOnda, botonActivo);
 
           if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
           
-          if (canceladoManualmente) {
+          if (state.canceladoManualmente) {
             setEstadoVisual("idle");
-            const cancelHtml = `
-              <div class="flex flex-row items-center gap-2 w-full animate-bubble-in mt-2 justify-center">
-                  <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                      <p class="text-[14px] font-medium text-white/50">Grabación cancelada.</p>
-                  </div>
-              </div>`;
-            if (rol === "staff") textoStaff.innerHTML = cancelHtml;
-            else textoGuest.innerHTML = cancelHtml;
+            inyectarSistema("Grabación cancelada");
             return;
           }
 
-          let duracion = Date.now() - tiempoInicio;
-          
-          if (duracion < 800 || volumenMaximoDetectado < 5) {
-            const shortHtml = `
-              <div class="flex flex-row items-center gap-2 w-full animate-bubble-in mt-2 justify-center">
-                  <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                      <p class="text-[14px] font-medium text-white/50">Audio vacío o muy corto.</p>
-                  </div>
-              </div>`;
-            if (rol === "staff") textoStaff.innerHTML = shortHtml;
-            else textoGuest.innerHTML = shortHtml;
+          if (Date.now() - state.tiempoInicio < 800) {
             setEstadoVisual("idle");
+            inyectarSistema("Audio muy corto o vacío");
             return;
           }
 
           const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-          audioChunks = [];
+          audioChunks = []; 
           enviarAudioAlServidor(audioBlob, rol);
         };
 
         mediaRecorder.start();
-        grabandoRol = rol;
+        state.grabandoRol = rol;
         setEstadoVisual("grabando", rol);
-        renderizarOndas(); 
+
+        const elementoOnda = rol === 'staff' ? dom.waveStaff : dom.waveGuest;
+        const botonActivo = rol === 'staff' ? dom.btnGrabarStaff : dom.btnGrabarGuest;
+        moduloAnimacionMedusa.iniciarMedusa(analyser, dataArray, elementoOnda, botonActivo);
 
       } catch (err) {
-        alert("Permite el acceso al micrófono.");
+        alert("Permite el acceso al micrófono para usar el traductor.");
         setEstadoVisual("idle");
       }
     };
 
     const detenerGrabacion = () => {
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-      grabandoRol = null;
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      state.grabandoRol = null;
     };
 
-    btnGrabarStaff.addEventListener('click', () => {
-      if (grabandoRol === "staff") detenerGrabacion();
-      else { if (grabandoRol) detenerGrabacion(); iniciarGrabacion("staff"); }
-    });
+    const handleGrabarClick = (rol) => {
+      if (state.grabandoRol === rol) detenerGrabacion();
+      else { 
+        if (state.grabandoRol) detenerGrabacion(); 
+        iniciarGrabacion(rol); 
+      }
+    };
 
-    btnGrabarGuest.addEventListener('click', () => {
-      if (grabandoRol === "guest") detenerGrabacion();
-      else { if (grabandoRol) detenerGrabacion(); iniciarGrabacion("guest"); }
-    });
+    dom.btnGrabarStaff.addEventListener('click', () => handleGrabarClick('staff'));
+    dom.btnGrabarGuest.addEventListener('click', () => handleGrabarClick('guest'));
 
-    btnCancelarStaff.addEventListener('click', (e) => {
+    const handleCancelar = (e) => {
       e.stopPropagation(); 
-      canceladoManualmente = true;
+      state.canceladoManualmente = true;
       detenerGrabacion();
-    });
+    };
 
-    btnCancelarGuest.addEventListener('click', (e) => {
-      e.stopPropagation();
-      canceladoManualmente = true;
-      detenerGrabacion();
-    });
-    
-    document.getElementById('btn-cerrar-traductor').addEventListener('click', () => {
-        if (typeof window.cerrarTraductor === 'function') window.cerrarTraductor();
-        else window.history.back();
+    dom.btnCancelarStaff.addEventListener('click', handleCancelar);
+    dom.btnCancelarGuest.addEventListener('click', handleCancelar);
+
+    // EVENT DELEGATION: REPETIR AUDIO O REINTENTAR ENVÍO
+    dom.chatContainer.addEventListener('click', (e) => {
+      const botonRepetir = e.target.closest('.btn-repetir-voz');
+      if (botonRepetir) {
+        const texto = botonRepetir.dataset.texto;
+        const iso = botonRepetir.dataset.iso;
+        const icono = botonRepetir.dataset.icono;
+        const audioBase64 = botonRepetir.dataset.audio;
+        
+        moduloSintesisVoz.reproducirAudioOTexto(texto, iso, icono, audioBase64);
+        return;
+      }
+
+      const botonReintentar = e.target.closest('.btn-ejecutar-reintento');
+      if (botonReintentar && state.ultimoAudioFallido) {
+        limpiarPastillaReintento();
+        enviarAudioAlServidor(state.ultimoAudioFallido.blob, state.ultimoAudioFallido.rol);
+      }
     });
   }
 };
