@@ -171,6 +171,32 @@ const moduloAnimacionesYEstilos = {
         will-change: transform, opacity;
       }
 
+      /* TOAST / BANNER DE ESTADO DE RED */
+      #banner-red-flotante {
+        position: absolute;
+        left: 50%;
+        bottom: calc(var(--sab) + 84px);
+        transform: translate3d(-50%, 18px, 0) scale(0.92);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 40;
+      }
+
+      #banner-red-flotante.visible {
+        transform: translate3d(-50%, 0, 0) scale(1);
+        opacity: 1;
+      }
+
+      @keyframes pulso-punto-rojo {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+      }
+
+      .punto-pulso-red {
+        animation: pulso-punto-rojo 1.5s infinite ease-in-out;
+      }
+
       ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
     </style>
   `
@@ -183,7 +209,7 @@ const moduloPlantillasInterfaz = {
   generarEstructuraPrincipal: () => `
     ${moduloAnimacionesYEstilos.obtenerCss()}
 
-    <div class="app-viewport-total bg-[#050505] text-white font-sans select-none">
+    <div class="app-viewport-total bg-[#050505] text-white font-sans select-none relative">
       
       <!-- Fondos de ambientación lumínica -->
       <div class="absolute -top-20 -left-20 w-[65vw] h-[65vw] max-w-[500px] max-h-[500px] bg-sky-600/15 rounded-full blur-[110px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform;"></div>
@@ -213,6 +239,14 @@ const moduloPlantillasInterfaz = {
 
         <div id="mensajes-wrapper" class="flex flex-col w-full"></div>
         <div id="scroll-anchor" class="w-full h-4 shrink-0 pointer-events-none"></div>
+      </div>
+
+      <!-- AVISO FLOTANTE DE CONECTIVIDAD (SOBRE LA BARRA INFERIOR) -->
+      <div id="banner-red-flotante" class="pointer-events-none">
+        <div id="banner-red-contenido" class="px-4 py-2 rounded-full backdrop-blur-xl shadow-2xl flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all">
+          <span id="banner-red-indicador" class="w-2.5 h-2.5 rounded-full"></span>
+          <span id="banner-red-texto">Comprobando conexión...</span>
+        </div>
       </div>
 
       <!-- FOOTER DINÁMICO ELEVADO -->
@@ -274,15 +308,10 @@ const moduloPlantillasInterfaz = {
     </div>
   `,
 
-  /* ==========================================================================
-     BURBUJAS PEGADAS A SUS RESPECTIVOS LADOS Y SEPARADAS DEL EXTREMO OPUESTO
-     ========================================================================== */
   generarBurbujaHtml: (hablantes, rol, textoTraducidoCompleto, isoDestino, iconoPersona, audioBase64) => {
     if (!hablantes || hablantes.length === 0) return "";
     
     const esStaff = rol === "staff";
-    // STAFF: mr-10 sm:mr-24 (pegado a la izquierda, separado de la derecha)
-    // GUEST: ml-10 sm:ml-24 (pegado a la derecha, separado de la izquierda)
     const margenContrario = esStaff ? "mr-8 sm:mr-20" : "ml-8 sm:ml-20";
     const alineacion = esStaff ? "justify-start text-left" : "justify-end text-left";
     const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
@@ -547,7 +576,106 @@ const moduloSintesisVoz = {
 };
 
 /* ==========================================================================
-   MODULO 5: SERVICIO DE RED Y ENVÍO CON ETIQUETA CORRELACIONAL
+   MODULO 5: MONITOR REACTIVO DE RED E INTERNET EN TIEMPO REAL
+   ========================================================================== */
+const moduloMonitorConexion = {
+  enLinea: typeof navigator !== 'undefined' ? navigator.onLine : true,
+  temporizadorOcultar: null,
+  domElementos: {},
+
+  inicializar: function(elementos, alCambiarEstado) {
+    this.domElementos = elementos;
+    this.enLinea = navigator.onLine;
+
+    // Escucha nativa instantánea sin polling pesado
+    window.addEventListener('online', () => this.manejarCambio(true, alCambiarEstado));
+    window.addEventListener('offline', () => this.manejarCambio(false, alCambiarEstado));
+
+    // Si ya inicia desconectado, mostrar inmediatamente
+    if (!this.enLinea) {
+      this.mostrarEstado(false, "Sin conexión a internet");
+    }
+  },
+
+  // Verificación rápida con HEAD para descartar Wi-Fi sin salida real
+  verificarConexionReal: async function() {
+    if (!navigator.onLine) return false;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      await fetch(moduloServicioTraduccion.URL_SERVICIO, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  manejarCambio: async function(posibleOnline, callback) {
+    if (posibleOnline) {
+      this.mostrarEstado('reconectando', "Problema con el Wi-Fi, reconectando...");
+      const conexionReal = await this.verificarConexionReal();
+      
+      if (conexionReal) {
+        this.enLinea = true;
+        this.mostrarEstado(true, "Conectado. Ya estás en línea.");
+        if (callback) callback(true);
+      } else {
+        this.enLinea = false;
+        this.mostrarEstado(false, "Wi-Fi conectado, pero sin salida a internet.");
+        if (callback) callback(false);
+      }
+    } else {
+      this.enLinea = false;
+      this.mostrarEstado(false, "Sin conexión a internet.");
+      if (callback) callback(false);
+    }
+  },
+
+  mostrarEstado: function(estado, mensaje) {
+    const { contenedor, contenido, indicador, texto } = this.domElementos;
+    if (!contenedor || !contenido || !indicador || !texto) return;
+
+    if (this.temporizadorOcultar) {
+      clearTimeout(this.temporizadorOcultar);
+      this.temporizadorOcultar = null;
+    }
+
+    texto.textContent = mensaje;
+    contenedor.classList.add('visible');
+
+    // Limpiar clases previas de color
+    contenido.className = "px-4 py-2 rounded-full backdrop-blur-xl shadow-2xl flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all";
+    indicador.className = "w-2.5 h-2.5 rounded-full";
+
+    if (estado === true) {
+      // Estado: En línea
+      contenido.classList.add('bg-emerald-500/25', 'border-emerald-500/40', 'text-emerald-300');
+      indicador.classList.add('bg-emerald-400', 'shadow-[0_0_8px_#34d399]');
+      
+      // Desaparece solo tras confirmar conexión
+      this.temporizadorOcultar = setTimeout(() => {
+        contenedor.classList.remove('visible');
+      }, 2800);
+    } else if (estado === 'reconectando') {
+      // Estado: Reconectando
+      contenido.classList.add('bg-amber-500/25', 'border-amber-500/40', 'text-amber-300');
+      indicador.classList.add('bg-amber-400', 'punto-pulso-red', 'shadow-[0_0_8px_#fbbf24]');
+    } else {
+      // Estado: Desconectado / Sin internet
+      contenido.classList.add('bg-red-500/25', 'border-red-500/40', 'text-red-300');
+      indicador.classList.add('bg-red-500', 'punto-pulso-red', 'shadow-[0_0_8px_#ef4444]');
+    }
+  }
+};
+
+/* ==========================================================================
+   MODULO 6: SERVICIO DE RED Y ENVÍO CON ETIQUETA CORRELACIONAL
    ========================================================================== */
 const moduloServicioTraduccion = {
   URL_SERVICIO: "https://asistente-backend.auraradio-cloud.workers.dev/",
@@ -575,7 +703,7 @@ const moduloServicioTraduccion = {
 };
 
 /* ==========================================================================
-   MODULO 6: CONTROLADOR PRINCIPAL (EXPORT DEFAULT)
+   MODULO 7: CONTROLADOR PRINCIPAL (EXPORT DEFAULT)
    ========================================================================== */
 export default {
   html: () => moduloPlantillasInterfaz.generarEstructuraPrincipal(),
@@ -599,7 +727,11 @@ export default {
       langStaff: document.getElementById('lang-staff'),
       langGuest: document.getElementById('lang-guest'),
       iconosStaff: document.getElementById('iconos-staff'),
-      iconosGuest: document.getElementById('iconos-guest')
+      iconosGuest: document.getElementById('iconos-guest'),
+      bannerRed: document.getElementById('banner-red-flotante'),
+      bannerRedContenido: document.getElementById('banner-red-contenido'),
+      bannerRedIndicador: document.getElementById('banner-red-indicador'),
+      bannerRedTexto: document.getElementById('banner-red-texto')
     };
 
     let state = {
@@ -653,6 +785,33 @@ export default {
       }
     };
 
+    // Inicializar el vigilante de conectividad reactivo
+    moduloMonitorConexion.inicializar({
+      contenedor: dom.bannerRed,
+      contenido: dom.bannerRedContenido,
+      indicador: dom.bannerRedIndicador,
+      texto: dom.bannerRedTexto
+    }, (estaEnLinea) => {
+      if (estaEnLinea) {
+        // Al regresar internet, si había un fallo pendiente por red, sugerir reintento
+        if (state.ultimoAudioFallido && !state.idPastillaReintento) {
+          state.idPastillaReintento = `reintento-${Date.now()}`;
+          const contenedor = dom.mensajesWrapper || dom.chatContainer;
+          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+          scrollToBottom();
+        }
+      } else {
+        // Si se cayó la red mientras estaba en procesamiento, cancelar la espera inútil
+        if (state.idEscribiendo) {
+          const loader = document.getElementById(state.idEscribiendo);
+          if (loader) loader.remove();
+          state.idEscribiendo = null;
+          setEstadoVisual("idle");
+          inyectarSistema("Se interrumpió la conexión durante la traducción.", true);
+        }
+      }
+    });
+
     const setEstadoVisual = (estado, rolFuente = null) => {
       if (estado === "grabando") {
         dom.divisor.classList.add('opacity-0');
@@ -686,10 +845,24 @@ export default {
     };
 
     // --------------------------------------------------------------------------
-    // PIPELINE DE ENVÍO
+    // PIPELINE DE ENVÍO CON MANEJO DE RED INSTANTÁNEO
     // --------------------------------------------------------------------------
     const enviarAudioAlServidor = (audioBlob, rol) => {
       limpiarPastillaReintento();
+
+      // Validación preventiva instantánea: si no hay red, no esperar timeouts
+      if (!moduloMonitorConexion.enLinea) {
+        moduloMonitorConexion.mostrarEstado(false, "No hay internet. Audio en espera de red.");
+        state.ultimoAudioFallido = { blob: audioBlob, rol: rol };
+        setEstadoVisual("idle");
+        
+        state.idPastillaReintento = `reintento-${Date.now()}`;
+        const contenedor = dom.mensajesWrapper || dom.chatContainer;
+        contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+        scrollToBottom();
+        return;
+      }
+
       setEstadoVisual("procesando", rol);
 
       const etiquetaActual = `etiqueta_${Date.now()}_${++state.contadorTurnos}`;
@@ -777,17 +950,21 @@ export default {
           .then(data => procesarRespuestaConEtiqueta(data, numIntento))
           .catch(err => {
             if (err.name === 'AbortError') return;
+            // Si el fetch falla de inmediato por desconexión de socket / DNS
+            if (!navigator.onLine) {
+              moduloMonitorConexion.manejarCambio(false);
+            }
           });
       };
 
       dispararIntento(1);
 
       temporizadores.push(setTimeout(() => {
-        dispararIntento(2);
+        if (moduloMonitorConexion.enLinea) dispararIntento(2);
       }, 2500));
 
       temporizadores.push(setTimeout(() => {
-        dispararIntento(3);
+        if (moduloMonitorConexion.enLinea) dispararIntento(3);
       }, 8000));
 
       temporizadores.push(setTimeout(() => {
@@ -810,6 +987,12 @@ export default {
     };
 
     const iniciarGrabacion = async (rol) => {
+      // Bloqueo preventivo si no hay internet
+      if (!moduloMonitorConexion.enLinea) {
+        moduloMonitorConexion.mostrarEstado(false, "No puedes traducir sin internet.");
+        return;
+      }
+
       moduloSintesisVoz.detenerCualquierAudio();
       moduloSintesisVoz.iniciarMotorSilencioso();
       
