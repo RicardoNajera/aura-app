@@ -89,7 +89,7 @@ const moduloUtilidades = {
 };
 
 /* ==========================================================================
-   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO POR GPU
+   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO (GRADO MÉDICO)
    ========================================================================== */
 const moduloAnimacionesYEstilos = {
   obtenerCss: () => `
@@ -101,8 +101,7 @@ const moduloAnimacionesYEstilos = {
         --sar: env(safe-area-inset-right, 0px);
         --header-h: calc(var(--sat) + 58px);
         --footer-h: calc(var(--sab) + 88px);
-        --vidrio-borde: 1px solid rgba(255, 255, 255, 0.18);
-        --vidrio-luz: inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+        --vidrio-borde: 1px solid rgba(255, 255, 255, 0.15);
       }
 
       .app-viewport-total {
@@ -120,7 +119,8 @@ const moduloAnimacionesYEstilos = {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         contain: strict;
-        background: radial-gradient(circle at 50% 0%, #161c2c 0%, #0a0e18 55%, #030407 100%);
+        background: #06090f; /* Fondo sólido oscuro para aliviar cálculo de pintura base */
+        background-image: radial-gradient(circle at 50% 0%, #131a28 0%, #0a0e18 55%, #030407 100%);
       }
 
       #chat-container {
@@ -131,9 +131,11 @@ const moduloAnimacionesYEstilos = {
         padding-top: calc(var(--header-h) + 12px);
         padding-bottom: calc(var(--footer-h) + 16px);
         overflow-y: auto;
-        overscroll-behavior: contain;
+        overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
         z-index: 10;
+        /* Acelera el scroll compuesto delegándolo a un hilo secundario del procesador */
+        will-change: scroll-position;
       }
 
       @keyframes animacion-pop-izquierda { 0% { opacity: 0; transform: translate3d(-24px, 0, 0) scale(0.96); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
@@ -142,49 +144,55 @@ const moduloAnimacionesYEstilos = {
       @keyframes rebote-puntos-escritura { 0%, 80%, 100% { transform: translate3d(0, 0, 0); } 40% { transform: translate3d(0, -6px, 0); } }
 
       .punto-escritura { animation: rebote-puntos-escritura 1.2s infinite ease-in-out both; will-change: transform; backface-visibility: hidden; }
-      .orbe-ambiente { position: absolute; border-radius: 50%; pointer-events: none; will-change: transform; backface-visibility: hidden; }
+      
+      /* Orbes simplificados: Se force GPU layer para que el blur estático no repinte en scroll */
+      .orbe-ambiente { 
+        position: absolute; border-radius: 50%; pointer-events: none; 
+        will-change: transform; transform: translateZ(0); backface-visibility: hidden; 
+      }
 
+      /* BURBUJAS OPTIMIZADAS PARA SCROLL EXTREMO */
       .burbuja-personal {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.45) 0%, rgba(0, 102, 255, 0.3) 100%);
-        backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
-        border: var(--vidrio-borde); box-shadow: var(--vidrio-luz), 0 4px 12px rgba(0, 102, 255, 0.15);
+        /* Se elimina backdrop-filter. Se reemplaza por un gradiente de alta opacidad que simula el cristal sobre fondo oscuro */
+        background: linear-gradient(135deg, rgba(14, 100, 180, 0.95) 0%, rgba(0, 60, 160, 0.85) 100%);
+        border: var(--vidrio-borde); box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
         border-bottom-left-radius: 6px !important; animation: animacion-pop-izquierda 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
-        will-change: auto; backface-visibility: visible; transform: none;
+        transform: translateZ(0); /* Acelera pintura individual */
       }
 
       .burbuja-huesped {
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.45) 0%, rgba(126, 34, 206, 0.3) 100%);
-        backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
-        border: var(--vidrio-borde); box-shadow: var(--vidrio-luz), 0 4px 12px rgba(126, 34, 206, 0.15);
+        background: linear-gradient(135deg, rgba(110, 40, 180, 0.95) 0%, rgba(70, 20, 140, 0.85) 100%);
+        border: var(--vidrio-borde); box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
         border-bottom-right-radius: 6px !important; animation: animacion-pop-derecha 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
-        will-change: auto; backface-visibility: visible; transform: none;
+        transform: translateZ(0);
       }
 
+      /* CRISTAL SUPERIOR/INFERIOR MANTIENEN BLUR POR SER ESTÁTICOS */
       .encabezado-cristal {
         position: absolute; top: 0; left: 0; right: 0; height: var(--header-h);
-        background: linear-gradient(180deg, rgba(13, 17, 27, 0.75) 0%, rgba(13, 17, 27, 0.55) 100%);
+        background: linear-gradient(180deg, rgba(13, 17, 27, 0.85) 0%, rgba(13, 17, 27, 0.65) 100%);
         backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-        padding-top: var(--sat); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translateZ(0);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        padding-top: var(--sat); display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        transform: translateZ(0); will-change: transform;
       }
 
       .pie-pagina-cristal {
         position: absolute; bottom: 0; left: 0; right: 0; height: var(--footer-h);
-        background: linear-gradient(0deg, rgba(10, 14, 23, 0.8) 0%, rgba(12, 17, 28, 0.6) 100%);
+        background: linear-gradient(0deg, rgba(10, 14, 23, 0.9) 0%, rgba(12, 17, 28, 0.7) 100%);
         backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
-        border-top: 1px solid rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), 0 -6px 20px rgba(0, 0, 0, 0.4);
-        padding-bottom: var(--sab); display: flex; align-items: center; justify-content: center; transform: translateZ(0);
-        transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
+        border-top: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.1), 0 -6px 20px rgba(0, 0, 0, 0.5);
+        padding-bottom: var(--sab); display: flex; align-items: center; justify-content: center; 
+        transform: translateZ(0); will-change: transform; transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
       }
 
       .pastilla-vidrio-luz {
-        background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
       .boton-ios-vidrio {
-        backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -2px 5px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.35);
+        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
       }
 
       .onda-medusa-base {
@@ -207,7 +215,7 @@ const moduloAnimacionesYEstilos = {
       .lateral-oculto { opacity: 0; transform: scale(0.85); pointer-events: none; }
 
       @keyframes pop-icono-rostro { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-      .animacion-rostro-pop { animation: pop-icono-rostro 0.35s cubic-bezier(0, 0, 0.2, 1) forwards; display: inline-flex; will-change: auto; }
+      .animacion-rostro-pop { animation: pop-icono-rostro 0.35s cubic-bezier(0, 0, 0.2, 1) forwards; display: inline-flex; will-change: transform; }
 
       #banner-red-flotante {
         position: absolute; left: 50%; bottom: calc(var(--sab) + 94px); transform: translate3d(-50%, 14px, 0) scale(0.94);
@@ -218,7 +226,12 @@ const moduloAnimacionesYEstilos = {
       @keyframes pulso-punto-rojo { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
       .punto-pulso-red { animation: pulso-punto-rojo 1.4s infinite ease-in-out; }
 
-      .item-mensaje { contain: content; }
+      /* VIRTUALIZACIÓN DE RENDIMIENTO: Evita rendering de elementos invisibles */
+      .item-mensaje { 
+        contain: layout paint style; 
+        content-visibility: auto; 
+        contain-intrinsic-size: auto 110px; /* Placeholder para evitar saltos de scroll */
+      }
       ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
     </style>
   `
