@@ -28,7 +28,7 @@ const moduloAnimacionesYEstilos = {
         -webkit-tap-highlight-color: transparent;
       }
 
-      /* ANIMACIONES RANGER PEGADAS A CADA EXTREMO */
+      /* ANIMACIONES RANGER PEGADAS A CADA EXTREMO - Optimizadas con backface-visibility */
       @keyframes animacion-pop-izquierda {
         0% { opacity: 0; transform: translate3d(-35px, 0, 0) scale(0.96); }
         100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
@@ -54,9 +54,10 @@ const moduloAnimacionesYEstilos = {
       .punto-escritura {
         animation: rebote-puntos-escritura 1.4s infinite ease-in-out both;
         will-change: transform;
+        backface-visibility: hidden;
       }
 
-      /* BURBUJA PERSONAL (STAFF) - PEGADA TOTALMENTE AL LADO IZQUIERDO */
+      /* BURBUJA PERSONAL (STAFF) */
       .burbuja-personal {
         background: linear-gradient(135deg, #0ea5e9 0%, #0066ff 100%);
         box-shadow: 0 10px 28px rgba(0, 102, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -64,15 +65,17 @@ const moduloAnimacionesYEstilos = {
         border-bottom-left-radius: 4px !important;
         animation: animacion-pop-izquierda 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         will-change: transform, opacity;
+        backface-visibility: hidden;
       }
 
-      /* BURBUJA HUÉSPED (GUEST) - PEGADA TOTALMENTE AL LADO DERECHO */
+      /* BURBUJA HUÉSPED (GUEST) */
       .burbuja-huesped {
         background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
         box-shadow: 0 10px 28px rgba(126, 34, 206, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         border-bottom-right-radius: 4px !important;
         animation: animacion-pop-derecha 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         will-change: transform, opacity;
+        backface-visibility: hidden;
       }
 
       .encabezado-cristal {
@@ -97,30 +100,25 @@ const moduloAnimacionesYEstilos = {
         transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      #wave-staff {
+      #wave-staff, #wave-guest {
         position: absolute;
         inset: -6px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.7) 0%, rgba(59, 130, 246, 0.45) 50%, rgba(0, 102, 255, 0.2) 80%, transparent 100%);
         filter: blur(10px);
         transform: scale(0);
         opacity: 0;
         pointer-events: none;
         will-change: transform, border-radius, opacity;
         transition: opacity 0.25s ease-out;
+        backface-visibility: hidden;
+      }
+
+      #wave-staff {
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.7) 0%, rgba(59, 130, 246, 0.45) 50%, rgba(0, 102, 255, 0.2) 80%, transparent 100%);
       }
 
       #wave-guest {
-        position: absolute;
-        inset: -6px;
-        border-radius: 50%;
         background: radial-gradient(circle, rgba(192, 132, 252, 0.7) 0%, rgba(168, 85, 247, 0.45) 50%, rgba(126, 34, 206, 0.2) 80%, transparent 100%);
-        filter: blur(10px);
-        transform: scale(0);
-        opacity: 0;
-        pointer-events: none;
-        will-change: transform, border-radius, opacity;
-        transition: opacity 0.25s ease-out;
       }
 
       .pastilla-cancelar {
@@ -169,9 +167,9 @@ const moduloAnimacionesYEstilos = {
         animation: pop-icono-rostro 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         display: inline-flex;
         will-change: transform, opacity;
+        backface-visibility: hidden;
       }
 
-      /* TOAST / BANNER DE ESTADO DE RED */
       #banner-red-flotante {
         position: absolute;
         left: 50%;
@@ -211,11 +209,9 @@ const moduloPlantillasInterfaz = {
 
     <div class="app-viewport-total bg-[#050505] text-white font-sans select-none relative">
       
-      <!-- Fondos de ambientación lumínica -->
-      <div class="absolute -top-20 -left-20 w-[65vw] h-[65vw] max-w-[500px] max-h-[500px] bg-sky-600/15 rounded-full blur-[110px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform;"></div>
-      <div class="absolute -bottom-20 -right-20 w-[65vw] h-[65vw] max-w-[460px] max-h-[460px] bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out; will-change: transform;"></div>
+      <div class="absolute -top-20 -left-20 w-[65vw] h-[65vw] max-w-[500px] max-h-[500px] bg-sky-600/15 rounded-full blur-[110px] pointer-events-none" style="animation: animacion-orbe-flotante 15s infinite alternate ease-in-out; will-change: transform; backface-visibility: hidden;"></div>
+      <div class="absolute -bottom-20 -right-20 w-[65vw] h-[65vw] max-w-[460px] max-h-[460px] bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out; will-change: transform; backface-visibility: hidden;"></div>
 
-      <!-- HEADER FIJO -->
       <header class="encabezado-cristal shrink-0 z-30 flex flex-col items-center justify-center w-full px-4 shadow-xl">
         <div class="flex flex-col items-center justify-center">
           <h1 class="text-[17px] sm:text-[19px] font-bold tracking-wide flex items-center justify-center drop-shadow-md text-center">
@@ -225,12 +221,7 @@ const moduloPlantillasInterfaz = {
         </div>
       </header>
 
-      <!-- ÁREA DE CHAT: ANCHO COMPLETO PARA CONTROLAR EL CONTACTO DIRECTO CON LOS BORDES -->
-      <div 
-        id="chat-container" 
-        class="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-4 z-10 flex flex-col select-none"
-        style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;"
-      >
+      <div id="chat-container" class="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-4 z-10 flex flex-col select-none" style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;">
         <div class="w-full flex justify-center mb-4 opacity-60 shrink-0">
           <div class="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold tracking-widest text-white/80 uppercase shadow">
             Inicio de Conversación
@@ -241,7 +232,6 @@ const moduloPlantillasInterfaz = {
         <div id="scroll-anchor" class="w-full h-4 shrink-0 pointer-events-none"></div>
       </div>
 
-      <!-- AVISO FLOTANTE DE CONECTIVIDAD (SOBRE LA BARRA INFERIOR) -->
       <div id="banner-red-flotante" class="pointer-events-none">
         <div id="banner-red-contenido" class="px-4 py-2 rounded-full backdrop-blur-xl shadow-2xl flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all">
           <span id="banner-red-indicador" class="w-2.5 h-2.5 rounded-full"></span>
@@ -249,11 +239,9 @@ const moduloPlantillasInterfaz = {
         </div>
       </div>
 
-      <!-- FOOTER DINÁMICO ELEVADO -->
       <div id="footer-container" class="pie-pagina-cristal shrink-0 z-30 w-full flex justify-center items-center">
         <div class="flex w-full max-w-2xl justify-between items-center px-3 sm:px-6 relative">
           
-          <!-- LADO IZQUIERDO (STAFF) -->
           <div id="wrapper-staff" class="contenedor-lateral flex flex-row items-center gap-3 relative p-1.5">
             <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
               <div id="iconos-staff" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
@@ -279,7 +267,6 @@ const moduloPlantillasInterfaz = {
 
           <div id="divisor" class="w-[1px] h-9 bg-white/10 rounded-full transition-opacity duration-300 mx-2 shrink-0"></div>
 
-          <!-- LADO DERECHO (GUEST) -->
           <div id="wrapper-guest" class="contenedor-lateral flex flex-row-reverse items-center gap-3 relative p-1.5">
             <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
               <div id="iconos-guest" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-md leading-none"></div>
@@ -399,23 +386,29 @@ const moduloPlantillasInterfaz = {
 };
 
 /* ==========================================================================
-   MODULO 3: ANIMACIÓN TIPO MEDUSA BIOLUMINISCENTE
+   MODULO 3: ANIMACIÓN TIPO MEDUSA BIOLUMINISCENTE (CON CÁLCULOS MATEMÁTICOS FPS-INDEPENDIENTES)
    ========================================================================== */
 const moduloAnimacionMedusa = {
   idAnimacion: null,
   escalaActual: 1,
   faseRespiracion: 0,
+  ultimoTiempo: 0,
 
   iniciarMedusa: function(analizador, matrizFrecuencia, elementoOnda, botonActivo) {
     if (!elementoOnda) return;
 
     this.escalaActual = 1;
     this.faseRespiracion = 0;
+    this.ultimoTiempo = performance.now();
     elementoOnda.style.opacity = "1";
     elementoOnda.style.display = "block";
 
-    const animarMedusa = () => {
+    const animarMedusa = (tiempoActual) => {
       this.idAnimacion = requestAnimationFrame(animarMedusa);
+      
+      // Cálculo delta para independizar la velocidad de los FPS (Ej: monitores 60hz vs 144hz)
+      const delta = Math.min((tiempoActual - this.ultimoTiempo) / 16.666, 2.0); 
+      this.ultimoTiempo = tiempoActual;
 
       let promedioVoz = 0;
       if (analizador && matrizFrecuencia) {
@@ -426,7 +419,7 @@ const moduloAnimacionMedusa = {
         promedioVoz = suma / bandasVoz;
       }
 
-      this.faseRespiracion += 0.05 + (promedioVoz / 800);
+      this.faseRespiracion += (0.05 + (promedioVoz / 800)) * delta;
       
       const r1 = 50 + Math.sin(this.faseRespiracion * 1.2) * 16;
       const r2 = 50 + Math.cos(this.faseRespiracion * 0.9) * 14;
@@ -441,7 +434,8 @@ const moduloAnimacionMedusa = {
         escalaObjetivo = Math.min(1.45, 1.08 + (factorNormalizado * 0.38));
       }
 
-      this.escalaActual += (escalaObjetivo - this.escalaActual) * 0.32;
+      // Interpolación suave matemática (Lerp) independiente de FPS
+      this.escalaActual += (escalaObjetivo - this.escalaActual) * (0.32 * delta);
       elementoOnda.style.transform = `scale(${this.escalaActual.toFixed(3)}) rotate(${(this.faseRespiracion * 12).toFixed(1)}deg)`;
 
       if (botonActivo) {
@@ -450,7 +444,7 @@ const moduloAnimacionMedusa = {
       }
     };
 
-    animarMedusa();
+    this.idAnimacion = requestAnimationFrame(animarMedusa);
   },
 
   detenerMedusa: function(elementoOnda, botonActivo) {
@@ -484,13 +478,13 @@ const moduloSintesisVoz = {
   reproductorAudioActivo: null,
 
   cargarVoces: function() {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.vocesDisponibles = window.speechSynthesis.getVoices();
     }
   },
 
   iniciarMotorSilencioso: function() {
-    if (!this.motorIniciado && 'speechSynthesis' in window) {
+    if (!this.motorIniciado && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       const locucionSilenciosa = new SpeechSynthesisUtterance('');
       locucionSilenciosa.volume = 0;
       window.speechSynthesis.speak(locucionSilenciosa);
@@ -499,7 +493,7 @@ const moduloSintesisVoz = {
   },
 
   detenerCualquierAudio: function() {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
     if (this.reproductorAudioActivo) {
@@ -510,7 +504,7 @@ const moduloSintesisVoz = {
   },
 
   reproducirTextoVozNativa: function(texto, codigoIso, iconoDominante) {
-    if (!('speechSynthesis' in window)) return;
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !texto) return;
 
     this.detenerCualquierAudio();
     const locucion = new SpeechSynthesisUtterance(texto);
@@ -551,7 +545,7 @@ const moduloSintesisVoz = {
   reproducirAudioOTexto: function(texto, codigoIso, iconoDominante, audioBase64FallBack) {
     this.detenerCualquierAudio();
 
-    if (audioBase64FallBack) {
+    if (audioBase64FallBack && typeof Audio !== 'undefined') {
       try {
         const audio = new Audio("data:audio/mp3;base64," + audioBase64FallBack);
         this.reproductorAudioActivo = audio;
@@ -585,21 +579,19 @@ const moduloMonitorConexion = {
 
   inicializar: function(elementos, alCambiarEstado) {
     this.domElementos = elementos;
-    this.enLinea = navigator.onLine;
+    if (typeof navigator !== 'undefined') {
+      this.enLinea = navigator.onLine;
+      window.addEventListener('online', () => this.manejarCambio(true, alCambiarEstado));
+      window.addEventListener('offline', () => this.manejarCambio(false, alCambiarEstado));
+    }
 
-    // Escucha nativa instantánea sin polling pesado
-    window.addEventListener('online', () => this.manejarCambio(true, alCambiarEstado));
-    window.addEventListener('offline', () => this.manejarCambio(false, alCambiarEstado));
-
-    // Si ya inicia desconectado, mostrar inmediatamente
     if (!this.enLinea) {
       this.mostrarEstado(false, "Sin conexión a internet");
     }
   },
 
-  // Verificación rápida con HEAD para descartar Wi-Fi sin salida real
   verificarConexionReal: async function() {
-    if (!navigator.onLine) return false;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return false;
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
@@ -649,25 +641,19 @@ const moduloMonitorConexion = {
     texto.textContent = mensaje;
     contenedor.classList.add('visible');
 
-    // Limpiar clases previas de color
     contenido.className = "px-4 py-2 rounded-full backdrop-blur-xl shadow-2xl flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all";
     indicador.className = "w-2.5 h-2.5 rounded-full";
 
     if (estado === true) {
-      // Estado: En línea
       contenido.classList.add('bg-emerald-500/25', 'border-emerald-500/40', 'text-emerald-300');
       indicador.classList.add('bg-emerald-400', 'shadow-[0_0_8px_#34d399]');
-      
-      // Desaparece solo tras confirmar conexión
       this.temporizadorOcultar = setTimeout(() => {
         contenedor.classList.remove('visible');
       }, 2800);
     } else if (estado === 'reconectando') {
-      // Estado: Reconectando
       contenido.classList.add('bg-amber-500/25', 'border-amber-500/40', 'text-amber-300');
       indicador.classList.add('bg-amber-400', 'punto-pulso-red', 'shadow-[0_0_8px_#fbbf24]');
     } else {
-      // Estado: Desconectado / Sin internet
       contenido.classList.add('bg-red-500/25', 'border-red-500/40', 'text-red-300');
       indicador.classList.add('bg-red-500', 'punto-pulso-red', 'shadow-[0_0_8px_#ef4444]');
     }
@@ -737,7 +723,6 @@ export default {
     let state = {
       grabandoRol: null,
       canceladoManualmente: false,
-      volumenMaximo: 0,
       tiempoInicio: 0,
       idEscribiendo: null,
       idPastillaReintento: null,
@@ -756,9 +741,10 @@ export default {
     let audioCtx = null;
     let analyser = null;
     let dataArray = null;
+    let activeStream = null;
 
     moduloSintesisVoz.cargarVoces();
-    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+    if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = () => moduloSintesisVoz.cargarVoces();
     }
 
@@ -772,9 +758,11 @@ export default {
 
     const inyectarSistema = (mensaje, esError = false) => {
       const contenedor = dom.mensajesWrapper || dom.chatContainer;
-      const html = moduloPlantillasInterfaz.generarMensajeSistemaHtml(mensaje, esError);
-      contenedor.insertAdjacentHTML('beforeend', html);
-      scrollToBottom();
+      if (contenedor) {
+        const html = moduloPlantillasInterfaz.generarMensajeSistemaHtml(mensaje, esError);
+        contenedor.insertAdjacentHTML('beforeend', html);
+        scrollToBottom();
+      }
     };
 
     const limpiarPastillaReintento = () => {
@@ -785,7 +773,6 @@ export default {
       }
     };
 
-    // Inicializar el vigilante de conectividad reactivo
     moduloMonitorConexion.inicializar({
       contenedor: dom.bannerRed,
       contenido: dom.bannerRedContenido,
@@ -793,15 +780,15 @@ export default {
       texto: dom.bannerRedTexto
     }, (estaEnLinea) => {
       if (estaEnLinea) {
-        // Al regresar internet, si había un fallo pendiente por red, sugerir reintento
         if (state.ultimoAudioFallido && !state.idPastillaReintento) {
           state.idPastillaReintento = `reintento-${Date.now()}`;
           const contenedor = dom.mensajesWrapper || dom.chatContainer;
-          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
-          scrollToBottom();
+          if (contenedor) {
+             contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+             scrollToBottom();
+          }
         }
       } else {
-        // Si se cayó la red mientras estaba en procesamiento, cancelar la espera inútil
         if (state.idEscribiendo) {
           const loader = document.getElementById(state.idEscribiendo);
           if (loader) loader.remove();
@@ -814,22 +801,22 @@ export default {
 
     const setEstadoVisual = (estado, rolFuente = null) => {
       if (estado === "grabando") {
-        dom.divisor.classList.add('opacity-0');
+        if (dom.divisor) dom.divisor.classList.add('opacity-0');
         
         if (rolFuente === "staff") {
-          dom.wrapperGuest.classList.add('lateral-oculto');
-          dom.btnCancelarStaff.classList.add('activo'); 
+          if (dom.wrapperGuest) dom.wrapperGuest.classList.add('lateral-oculto');
+          if (dom.btnCancelarStaff) dom.btnCancelarStaff.classList.add('activo'); 
         } else {
-          dom.wrapperStaff.classList.add('lateral-oculto');
-          dom.btnCancelarGuest.classList.add('activo'); 
+          if (dom.wrapperStaff) dom.wrapperStaff.classList.add('lateral-oculto');
+          if (dom.btnCancelarGuest) dom.btnCancelarGuest.classList.add('activo'); 
         }
       } else {
-        dom.divisor.classList.remove('opacity-0');
-        dom.wrapperStaff.classList.remove('lateral-oculto');
-        dom.wrapperGuest.classList.remove('lateral-oculto');
+        if (dom.divisor) dom.divisor.classList.remove('opacity-0');
+        if (dom.wrapperStaff) dom.wrapperStaff.classList.remove('lateral-oculto');
+        if (dom.wrapperGuest) dom.wrapperGuest.classList.remove('lateral-oculto');
         
-        dom.btnCancelarStaff.classList.remove('activo');
-        dom.btnCancelarGuest.classList.remove('activo');
+        if (dom.btnCancelarStaff) dom.btnCancelarStaff.classList.remove('activo');
+        if (dom.btnCancelarGuest) dom.btnCancelarGuest.classList.remove('activo');
 
         moduloAnimacionMedusa.detenerMedusa(dom.waveStaff, dom.btnGrabarStaff);
         moduloAnimacionMedusa.detenerMedusa(dom.waveGuest, dom.btnGrabarGuest);
@@ -838,19 +825,17 @@ export default {
           const id = `typing-${Date.now()}`;
           state.idEscribiendo = id;
           const contenedor = dom.mensajesWrapper || dom.chatContainer;
-          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarHtmlEscribiendo(rolFuente, id));
-          scrollToBottom();
+          if (contenedor) {
+             contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarHtmlEscribiendo(rolFuente, id));
+             scrollToBottom();
+          }
         }
       }
     };
 
-    // --------------------------------------------------------------------------
-    // PIPELINE DE ENVÍO CON MANEJO DE RED INSTANTÁNEO
-    // --------------------------------------------------------------------------
     const enviarAudioAlServidor = (audioBlob, rol) => {
       limpiarPastillaReintento();
 
-      // Validación preventiva instantánea: si no hay red, no esperar timeouts
       if (!moduloMonitorConexion.enLinea) {
         moduloMonitorConexion.mostrarEstado(false, "No hay internet. Audio en espera de red.");
         state.ultimoAudioFallido = { blob: audioBlob, rol: rol };
@@ -858,8 +843,10 @@ export default {
         
         state.idPastillaReintento = `reintento-${Date.now()}`;
         const contenedor = dom.mensajesWrapper || dom.chatContainer;
-        contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
-        scrollToBottom();
+        if (contenedor) {
+           contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+           scrollToBottom();
+        }
         return;
       }
 
@@ -914,30 +901,32 @@ export default {
 
           if (rol === "staff") {
             state.memoriaIdiomas.staff.iso = dominante.iso;
-            if (htmlIconos) dom.iconosStaff.innerHTML = htmlIconos;
-            dom.langStaff.textContent = multiNombre;
-            if (data.nombre_destino && data.nombre_destino !== "Silencio") dom.langGuest.textContent = data.nombre_destino;
+            if (htmlIconos && dom.iconosStaff) dom.iconosStaff.innerHTML = htmlIconos;
+            if (dom.langStaff) dom.langStaff.textContent = multiNombre;
+            if (data.nombre_destino && data.nombre_destino !== "Silencio" && dom.langGuest) dom.langGuest.textContent = data.nombre_destino;
           } else {
             state.memoriaIdiomas.guest.iso = dominante.iso;
-            if (htmlIconos) dom.iconosGuest.innerHTML = htmlIconos;
-            dom.langGuest.textContent = multiNombre;
-            if (data.nombre_destino && data.nombre_destino !== "Silencio") dom.langStaff.textContent = data.nombre_destino;
+            if (htmlIconos && dom.iconosGuest) dom.iconosGuest.innerHTML = htmlIconos;
+            if (dom.langGuest) dom.langGuest.textContent = multiNombre;
+            if (data.nombre_destino && data.nombre_destino !== "Silencio" && dom.langStaff) dom.langStaff.textContent = data.nombre_destino;
           }
         }
 
         const contenedor = dom.mensajesWrapper || dom.chatContainer;
-        contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarBurbujaHtml(
-          data.hablantes, 
-          rol, 
-          data.texto_traducido, 
-          data.iso_destino, 
-          dominante ? dominante.icono_persona : null, 
-          data.audio_voz
-        ));
-        scrollToBottom();
+        if (contenedor) {
+           contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarBurbujaHtml(
+             data.hablantes, 
+             rol, 
+             data.texto_traducido, 
+             data.iso_destino, 
+             dominante ? dominante.icono_persona : null, 
+             data.audio_voz
+           ));
+           scrollToBottom();
+        }
         setEstadoVisual("idle");
 
-        if (!esSilencio) {
+        if (!esSilencio && dominante) {
           moduloSintesisVoz.reproducirAudioOTexto(data.texto_traducido, data.iso_destino, dominante.icono_persona, data.audio_voz);
         }
       };
@@ -950,8 +939,7 @@ export default {
           .then(data => procesarRespuestaConEtiqueta(data, numIntento))
           .catch(err => {
             if (err.name === 'AbortError') return;
-            // Si el fetch falla de inmediato por desconexión de socket / DNS
-            if (!navigator.onLine) {
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
               moduloMonitorConexion.manejarCambio(false);
             }
           });
@@ -980,14 +968,15 @@ export default {
 
           state.idPastillaReintento = `reintento-${Date.now()}`;
           const contenedor = dom.mensajesWrapper || dom.chatContainer;
-          contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
-          scrollToBottom();
+          if (contenedor) {
+             contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarPastillaReintentarHtml(state.idPastillaReintento));
+             scrollToBottom();
+          }
         }
       }, 15000));
     };
 
     const iniciarGrabacion = async (rol) => {
-      // Bloqueo preventivo si no hay internet
       if (!moduloMonitorConexion.enLinea) {
         moduloMonitorConexion.mostrarEstado(false, "No puedes traducir sin internet.");
         return;
@@ -1009,6 +998,7 @@ export default {
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeStream = stream;
         
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
@@ -1019,7 +1009,6 @@ export default {
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         
-        state.volumenMaximo = 0;
         state.tiempoInicio = Date.now();
 
         const mimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
@@ -1035,7 +1024,10 @@ export default {
           const botonActivo = state.grabandoRol === 'staff' ? dom.btnGrabarStaff : dom.btnGrabarGuest;
           moduloAnimacionMedusa.detenerMedusa(elementoOnda, botonActivo);
 
-          if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+          if (activeStream) {
+            activeStream.getTracks().forEach(t => t.stop());
+            activeStream = null;
+          }
           
           if (state.canceladoManualmente) {
             setEstadoVisual("idle");
@@ -1069,7 +1061,9 @@ export default {
     };
 
     const detenerGrabacion = () => {
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
       state.grabandoRol = null;
     };
 
@@ -1081,8 +1075,8 @@ export default {
       }
     };
 
-    dom.btnGrabarStaff.addEventListener('click', () => handleGrabarClick('staff'));
-    dom.btnGrabarGuest.addEventListener('click', () => handleGrabarClick('guest'));
+    if (dom.btnGrabarStaff) dom.btnGrabarStaff.addEventListener('click', () => handleGrabarClick('staff'));
+    if (dom.btnGrabarGuest) dom.btnGrabarGuest.addEventListener('click', () => handleGrabarClick('guest'));
 
     const handleCancelar = (e) => {
       e.stopPropagation(); 
@@ -1090,26 +1084,28 @@ export default {
       detenerGrabacion();
     };
 
-    dom.btnCancelarStaff.addEventListener('click', handleCancelar);
-    dom.btnCancelarGuest.addEventListener('click', handleCancelar);
+    if (dom.btnCancelarStaff) dom.btnCancelarStaff.addEventListener('click', handleCancelar);
+    if (dom.btnCancelarGuest) dom.btnCancelarGuest.addEventListener('click', handleCancelar);
 
-    dom.chatContainer.addEventListener('click', (e) => {
-      const botonRepetir = e.target.closest('.btn-repetir-voz');
-      if (botonRepetir) {
-        const texto = botonRepetir.dataset.texto;
-        const iso = botonRepetir.dataset.iso;
-        const icono = botonRepetir.dataset.icono;
-        const audioBase64 = botonRepetir.dataset.audio;
-        
-        moduloSintesisVoz.reproducirAudioOTexto(texto, iso, icono, audioBase64);
-        return;
-      }
+    if (dom.chatContainer) {
+      dom.chatContainer.addEventListener('click', (e) => {
+        const botonRepetir = e.target.closest('.btn-repetir-voz');
+        if (botonRepetir) {
+          const texto = botonRepetir.dataset.texto;
+          const iso = botonRepetir.dataset.iso;
+          const icono = botonRepetir.dataset.icono;
+          const audioBase64 = botonRepetir.dataset.audio;
+          
+          moduloSintesisVoz.reproducirAudioOTexto(texto, iso, icono, audioBase64);
+          return;
+        }
 
-      const botonReintentar = e.target.closest('.btn-ejecutar-reintento');
-      if (botonReintentar && state.ultimoAudioFallido) {
-        limpiarPastillaReintento();
-        enviarAudioAlServidor(state.ultimoAudioFallido.blob, state.ultimoAudioFallido.rol);
-      }
-    });
+        const botonReintentar = e.target.closest('.btn-ejecutar-reintento');
+        if (botonReintentar && state.ultimoAudioFallido) {
+          limpiarPastillaReintento();
+          enviarAudioAlServidor(state.ultimoAudioFallido.blob, state.ultimoAudioFallido.rol);
+        }
+      });
+    }
   }
 };
