@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Motor de Asistente de Voz Bidireccional - Arquitectura Corporativa
- * @version 3.0.0 (Enterprise Edition)
+ * @version 3.0.0 (Enterprise Edition - Ultra Performance Optimizado)
  * 
  * @typedef {Object} Hablante
  * @property {string} [icono_persona]
@@ -70,7 +70,9 @@ const moduloUtilidades = {
   mostrarNotificacionUX: (mensaje) => {
     try {
       const toast = document.createElement('div');
-      toast.className = 'fixed top-12 left-1/2 transform -translate-x-1/2 bg-red-500/95 text-white px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md z-[100] text-[13px] font-bold tracking-wide animate-[animacion-pop-derecha_0.3s_ease-out] flex items-center gap-2 border border-red-400/50';
+      toast.className = 'fixed top-12 left-1/2 transform -translate-x-1/2 bg-red-500/95 text-white px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md z-[100] text-[13px] font-bold tracking-wide flex items-center gap-2 border border-red-400/50';
+      toast.style.willChange = 'transform, opacity';
+      toast.style.animation = 'animacion-pop-derecha 0.3s ease-out';
       toast.innerHTML = `
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         <span>${moduloUtilidades.escaparHTML(mensaje)}</span>
@@ -89,7 +91,7 @@ const moduloUtilidades = {
 };
 
 /* ==========================================================================
-   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO (GRADO MÉDICO)
+   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO POR GPU
    ========================================================================== */
 const moduloAnimacionesYEstilos = {
   obtenerCss: () => `
@@ -101,7 +103,8 @@ const moduloAnimacionesYEstilos = {
         --sar: env(safe-area-inset-right, 0px);
         --header-h: calc(var(--sat) + 58px);
         --footer-h: calc(var(--sab) + 88px);
-        --vidrio-borde: 1px solid rgba(255, 255, 255, 0.15);
+        --vidrio-borde: 1px solid rgba(255, 255, 255, 0.18);
+        --vidrio-luz: inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
       }
 
       .app-viewport-total {
@@ -119,8 +122,7 @@ const moduloAnimacionesYEstilos = {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         contain: strict;
-        background: #06090f; /* Fondo sólido oscuro para aliviar cálculo de pintura base */
-        background-image: radial-gradient(circle at 50% 0%, #131a28 0%, #0a0e18 55%, #030407 100%);
+        background: radial-gradient(circle at 50% 0%, #161c2c 0%, #0a0e18 55%, #030407 100%);
       }
 
       #chat-container {
@@ -131,11 +133,10 @@ const moduloAnimacionesYEstilos = {
         padding-top: calc(var(--header-h) + 12px);
         padding-bottom: calc(var(--footer-h) + 16px);
         overflow-y: auto;
-        overscroll-behavior-y: contain;
+        overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         z-index: 10;
-        /* Acelera el scroll compuesto delegándolo a un hilo secundario del procesador */
-        will-change: scroll-position;
+        contain: layout size;
       }
 
       @keyframes animacion-pop-izquierda { 0% { opacity: 0; transform: translate3d(-24px, 0, 0) scale(0.96); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
@@ -145,59 +146,59 @@ const moduloAnimacionesYEstilos = {
 
       .punto-escritura { animation: rebote-puntos-escritura 1.2s infinite ease-in-out both; will-change: transform; backface-visibility: hidden; }
       
-      /* Orbes simplificados: Se force GPU layer para que el blur estático no repinte en scroll */
-      .orbe-ambiente { 
-        position: absolute; border-radius: 50%; pointer-events: none; 
-        will-change: transform; transform: translateZ(0); backface-visibility: hidden; 
-      }
+      /* Optimización GPU: Eliminado filter: blur() pesado, reemplazado por radial-gradient puro y strict containment */
+      .orbe-ambiente { position: absolute; pointer-events: none; will-change: transform; backface-visibility: hidden; contain: strict; border-radius: 50%; }
 
-      /* BURBUJAS OPTIMIZADAS PARA SCROLL EXTREMO */
       .burbuja-personal {
-        /* Se elimina backdrop-filter. Se reemplaza por un gradiente de alta opacidad que simula el cristal sobre fondo oscuro */
-        background: linear-gradient(135deg, rgba(14, 100, 180, 0.95) 0%, rgba(0, 60, 160, 0.85) 100%);
-        border: var(--vidrio-borde); box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.45) 0%, rgba(0, 102, 255, 0.3) 100%);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border: var(--vidrio-borde); box-shadow: var(--vidrio-luz), 0 4px 12px rgba(0, 102, 255, 0.15);
         border-bottom-left-radius: 6px !important; animation: animacion-pop-izquierda 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
-        transform: translateZ(0); /* Acelera pintura individual */
+        will-change: transform, opacity; backface-visibility: hidden; transform: translateZ(0);
       }
 
       .burbuja-huesped {
-        background: linear-gradient(135deg, rgba(110, 40, 180, 0.95) 0%, rgba(70, 20, 140, 0.85) 100%);
-        border: var(--vidrio-borde); box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.45) 0%, rgba(126, 34, 206, 0.3) 100%);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border: var(--vidrio-borde); box-shadow: var(--vidrio-luz), 0 4px 12px rgba(126, 34, 206, 0.15);
         border-bottom-right-radius: 6px !important; animation: animacion-pop-derecha 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
-        transform: translateZ(0);
+        will-change: transform, opacity; backface-visibility: hidden; transform: translateZ(0);
       }
 
-      /* CRISTAL SUPERIOR/INFERIOR MANTIENEN BLUR POR SER ESTÁTICOS */
       .encabezado-cristal {
         position: absolute; top: 0; left: 0; right: 0; height: var(--header-h);
-        background: linear-gradient(180deg, rgba(13, 17, 27, 0.85) 0%, rgba(13, 17, 27, 0.65) 100%);
-        backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        padding-top: var(--sat); display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        transform: translateZ(0); will-change: transform;
+        background: linear-gradient(180deg, rgba(13, 17, 27, 0.75) 0%, rgba(13, 17, 27, 0.55) 100%);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        padding-top: var(--sat); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translateZ(0);
+        contain: layout size paint;
       }
 
       .pie-pagina-cristal {
         position: absolute; bottom: 0; left: 0; right: 0; height: var(--footer-h);
-        background: linear-gradient(0deg, rgba(10, 14, 23, 0.9) 0%, rgba(12, 17, 28, 0.7) 100%);
-        backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
-        border-top: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.1), 0 -6px 20px rgba(0, 0, 0, 0.5);
-        padding-bottom: var(--sab); display: flex; align-items: center; justify-content: center; 
-        transform: translateZ(0); will-change: transform; transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
+        background: linear-gradient(0deg, rgba(10, 14, 23, 0.8) 0%, rgba(12, 17, 28, 0.6) 100%);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), 0 -6px 20px rgba(0, 0, 0, 0.4);
+        padding-bottom: var(--sab); display: flex; align-items: center; justify-content: center; transform: translateZ(0);
+        transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
+        contain: layout size paint;
       }
 
       .pastilla-vidrio-luz {
-        background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateZ(0);
       }
 
       .boton-ios-vidrio {
-        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25);
-        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -2px 5px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.35);
+        transform: translateZ(0); will-change: transform;
       }
 
       .onda-medusa-base {
         position: absolute; inset: -12px; border-radius: 42% 58% 62% 38% / 45% 40% 60% 55%;
-        opacity: 0; pointer-events: none; will-change: transform, opacity; transform: scale(0); transition: opacity 0.2s ease-out;
+        opacity: 0; pointer-events: none; will-change: transform, opacity; transform: translateZ(0) scale(0); transition: opacity 0.2s ease-out;
       }
 
       #wave-staff { background: radial-gradient(circle, rgba(14, 165, 233, 0.6) 0%, rgba(0, 102, 255, 0.22) 60%, transparent 80%); }
@@ -205,57 +206,63 @@ const moduloAnimacionesYEstilos = {
 
       .pastilla-cancelar {
         width: 0px; opacity: 0; pointer-events: none; transition: width 0.3s cubic-bezier(0, 0, 0.2, 1), opacity 0.25s ease;
-        white-space: nowrap; overflow: hidden; position: absolute; top: 50%; transform: translateY(-50%);
+        white-space: nowrap; overflow: hidden; position: absolute; top: 50%; transform: translateY(-50%) translateZ(0);
+        will-change: width, opacity, transform;
       }
       
-      #btn-cancelar-staff.activo { width: clamp(105px, 28vw, 130px); opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(12px); }
-      #btn-cancelar-guest.activo { width: clamp(105px, 28vw, 130px); opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(-12px); }
+      #btn-cancelar-staff.activo { width: clamp(105px, 28vw, 130px); opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(12px) translateZ(0); }
+      #btn-cancelar-guest.activo { width: clamp(105px, 28vw, 130px); opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(-12px) translateZ(0); }
 
-      .contenedor-lateral { transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1), transform 0.25s cubic-bezier(0, 0, 0.2, 1); }
-      .lateral-oculto { opacity: 0; transform: scale(0.85); pointer-events: none; }
+      .contenedor-lateral { transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1), transform 0.25s cubic-bezier(0, 0, 0.2, 1); will-change: opacity, transform; }
+      .lateral-oculto { opacity: 0; transform: scale(0.85) translateZ(0); pointer-events: none; }
 
-      @keyframes pop-icono-rostro { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-      .animacion-rostro-pop { animation: pop-icono-rostro 0.35s cubic-bezier(0, 0, 0.2, 1) forwards; display: inline-flex; will-change: transform; }
+      @keyframes pop-icono-rostro { 0% { transform: scale(0) translateZ(0); opacity: 0; } 70% { transform: scale(1.15) translateZ(0); opacity: 1; } 100% { transform: scale(1) translateZ(0); opacity: 1; } }
+      .animacion-rostro-pop { animation: pop-icono-rostro 0.35s cubic-bezier(0, 0, 0.2, 1) forwards; display: inline-flex; will-change: transform, opacity; }
 
       #banner-red-flotante {
         position: absolute; left: 50%; bottom: calc(var(--sab) + 94px); transform: translate3d(-50%, 14px, 0) scale(0.94);
         opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1), opacity 0.25s ease; z-index: 40;
+        will-change: transform, opacity;
       }
       #banner-red-flotante.visible { transform: translate3d(-50%, 0, 0) scale(1); opacity: 1; }
 
-      @keyframes pulso-punto-rojo { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
-      .punto-pulso-red { animation: pulso-punto-rojo 1.4s infinite ease-in-out; }
+      @keyframes pulso-punto-rojo { 0%, 100% { opacity: 1; transform: scale(1) translateZ(0); } 50% { opacity: 0.4; transform: scale(0.85) translateZ(0); } }
+      .punto-pulso-red { animation: pulso-punto-rojo 1.4s infinite ease-in-out; will-change: transform, opacity; }
 
-      /* VIRTUALIZACIÓN DE RENDIMIENTO: Evita rendering de elementos invisibles */
-      .item-mensaje { 
-        contain: layout paint style; 
-        content-visibility: auto; 
-        contain-intrinsic-size: auto 110px; /* Placeholder para evitar saltos de scroll */
-      }
+      /* Máximo aislamiento de repintado para los nodos inyectados */
+      .item-mensaje { contain: layout paint style; transform: translateZ(0); }
       ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
     </style>
   `
 };
 
 /* ==========================================================================
-   MODULO 1.5: OPTIMIZACIÓN DE MEMORIA HEAP (BASE64 A PUNTERO BLOB)
+   MODULO 1.5: OPTIMIZACIÓN DE MEMORIA HEAP Y DESBLOQUEO DEL MAIN THREAD
    ========================================================================== */
 const moduloOptimizacionMemoria = {
-  base64ABlobUrl: (base64, mimeType = 'audio/mp3') => {
+  base64ABlobUrl: async (base64, mimeType = 'audio/mp3') => {
     if (!base64) return '';
     try {
       const inicioProc = performance.now();
-      const binario = atob(base64);
-      const longitud = binario.length;
-      const buffer = new Uint8Array(longitud);
-      for (let i = 0; i < longitud; i++) buffer[i] = binario.charCodeAt(i);
-      const blob = new Blob([buffer], { type: mimeType });
+      // Offload Base64 decoding a thread nativo vía Fetch API para no bloquear Main Thread
+      const fetchRespuesta = await fetch(`data:${mimeType};base64,${base64}`);
+      const blob = await fetchRespuesta.blob();
       const url = URL.createObjectURL(blob);
-      moduloTelemetria.logEvento('Base64_Decodificado', { ms: performance.now() - inicioProc, size: longitud });
+      moduloTelemetria.logEvento('Base64_Decodificado_Nativo', { ms: performance.now() - inicioProc, size: blob.size });
       return url;
     } catch (e) {
-      moduloTelemetria.logError('base64ABlobUrl', e);
-      return '';
+      // Fallback ultra-rápido síncrono si el fetch falla
+      moduloTelemetria.logError('base64ABlobUrl_Nativo_Fallo', e);
+      try {
+        const binario = atob(base64);
+        const longitud = binario.length;
+        const buffer = new Uint8Array(longitud);
+        for (let i = 0; i < longitud; i++) buffer[i] = binario.charCodeAt(i);
+        const blob = new Blob([buffer], { type: mimeType });
+        return URL.createObjectURL(blob);
+      } catch (errSync) {
+        return '';
+      }
     }
   }
 };
@@ -267,9 +274,10 @@ const moduloPlantillasInterfaz = {
   generarEstructuraPrincipal: () => `
     ${moduloAnimacionesYEstilos.obtenerCss()}
     <div class="app-viewport-total text-white font-sans select-none relative">
-      <div class="orbe-ambiente -top-24 -left-20 w-[75vw] h-[75vw] max-w-[460px] max-h-[460px] bg-sky-500/20 blur-[48px]" style="animation: animacion-orbe-flotante 14s infinite alternate ease-in-out;"></div>
-      <div class="orbe-ambiente -bottom-24 -right-20 w-[75vw] h-[75vw] max-w-[440px] max-h-[440px] bg-purple-600/25 blur-[48px]" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out;"></div>
-      <div class="orbe-ambiente top-1/2 left-1/3 w-[50vw] h-[50vw] max-w-[320px] max-h-[320px] bg-indigo-500/12 blur-[56px] pointer-events-none"></div>
+      <!-- Optimización: radial-gradient reemplaza el costoso blur-[48px] filter para liberar la GPU -->
+      <div class="orbe-ambiente -top-24 -left-20 w-[75vw] h-[75vw] max-w-[460px] max-h-[460px]" style="background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, transparent 65%); animation: animacion-orbe-flotante 14s infinite alternate ease-in-out;"></div>
+      <div class="orbe-ambiente -bottom-24 -right-20 w-[75vw] h-[75vw] max-w-[440px] max-h-[440px]" style="background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 65%); animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out;"></div>
+      <div class="orbe-ambiente top-1/2 left-1/3 w-[50vw] h-[50vw] max-w-[320px] max-h-[320px]" style="background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 65%);"></div>
 
       <header class="encabezado-cristal shrink-0 z-30 w-full px-4">
         <div class="flex flex-col items-center justify-center">
@@ -354,7 +362,7 @@ const moduloPlantillasInterfaz = {
       const nombreIdioma = moduloUtilidades.escaparHTML(h.nombre_idioma || 'Idioma detectado');
       const textoPronunciar = moduloUtilidades.escaparHTML(h.frase_traducida || h.texto_traducida || textoTraducidoCompleto || "");
       const isoPronunciar = moduloUtilidades.escaparHTML(h.iso || isoDestino || 'en');
-      const iconoFinal = moduloUtilidades.escaparHTML(h.icono_persona || iconoPersona || '🗣️️');
+      const iconoFinal = moduloUtilidades.escaparHTML(h.icono_persona || iconoPersona || '🗣');
       const fraseOriginal = moduloUtilidades.escaparHTML(h.frase_original || h.texto_original || "...");
       const fraseTraducida = moduloUtilidades.escaparHTML(h.frase_traducida || h.texto_traducida || "...");
       const audioAttr = audioUrl || '';
@@ -417,12 +425,13 @@ const moduloPlantillasInterfaz = {
 };
 
 /* ==========================================================================
-   MODULO 3: MOTOR MATEMÁTICO DE ONDA MEDUSA (LUT INTEGRADA)
+   MODULO 3: MOTOR MATEMÁTICO DE ONDA MEDUSA (LUT INTEGRADA Y PUNTEROS)
    ========================================================================== */
 const moduloAnimacionMedusa = {
   idAnimacion: null,
   escalaActual: 0.2, escalaBoton: 1.0, faseRespiracion: 0, ultimoTiempo: 0, volumenSuavizado: 0,
   LUT_TAMANO: 512, LUT_MASCARA: 511, tablaSeno: new Float32Array(512), lutInicializada: false,
+  estiloOndaCache: null, estiloBotonCache: null,
 
   inicializarLut: function() {
     if (this.lutInicializada) return;
@@ -440,7 +449,13 @@ const moduloAnimacionMedusa = {
     if (!elementoOnda) return;
     this.inicializarLut();
     this.escalaActual = 0.2; this.escalaBoton = 1.0; this.faseRespiracion = 0; this.volumenSuavizado = 0; this.ultimoTiempo = performance.now();
-    elementoOnda.style.opacity = "0.4"; elementoOnda.style.transform = "scale3d(0.2, 0.2, 1)";
+    
+    // Caché de punteros CSSOM para saltar la búsqueda del DOM por frame (60fps)
+    this.estiloOndaCache = elementoOnda.style;
+    this.estiloBotonCache = botonActivo ? botonActivo.style : null;
+    
+    this.estiloOndaCache.opacity = "0.4"; 
+    this.estiloOndaCache.transform = "scale3d(0.2, 0.2, 1) translateZ(0)";
 
     const animarMedusa = (tiempoActual) => {
       this.idAnimacion = requestAnimationFrame(animarMedusa);
@@ -468,12 +483,12 @@ const moduloAnimacionMedusa = {
       const factorAmortiguacion = 1 - Math.exp(-0.35 * delta);
       this.escalaActual += (escalaObjetivo - this.escalaActual) * factorAmortiguacion;
 
-      elementoOnda.style.opacity = Math.min(0.95, Math.max(0.3, 0.3 + (this.volumenSuavizado * 0.035))).toFixed(2);
-      elementoOnda.style.transform = `scale3d(${(this.escalaActual * (1.0 + senFase * 0.045)).toFixed(3)}, ${(this.escalaActual * (1.0 - cosFase * 0.045)).toFixed(3)}, 1) rotate(${(this.faseRespiracion * 9.5).toFixed(1)}deg)`;
+      this.estiloOndaCache.opacity = Math.min(0.95, Math.max(0.3, 0.3 + (this.volumenSuavizado * 0.035))).toFixed(2);
+      this.estiloOndaCache.transform = `scale3d(${(this.escalaActual * (1.0 + senFase * 0.045)).toFixed(3)}, ${(this.escalaActual * (1.0 - cosFase * 0.045)).toFixed(3)}, 1) rotate(${(this.faseRespiracion * 9.5).toFixed(1)}deg) translateZ(0)`;
 
-      if (botonActivo) {
+      if (this.estiloBotonCache) {
         this.escalaBoton += ((1.0 - (Math.max(0, this.escalaActual - 0.5)) * 0.04) - this.escalaBoton) * factorAmortiguacion;
-        botonActivo.style.transform = `scale3d(${this.escalaBoton.toFixed(3)}, ${this.escalaBoton.toFixed(3)}, 1)`;
+        this.estiloBotonCache.transform = `scale3d(${this.escalaBoton.toFixed(3)}, ${this.escalaBoton.toFixed(3)}, 1) translateZ(0)`;
       }
     };
     this.idAnimacion = requestAnimationFrame(animarMedusa);
@@ -481,17 +496,18 @@ const moduloAnimacionMedusa = {
 
   detenerMedusa: function(elementoOnda, botonActivo) {
     if (this.idAnimacion) { cancelAnimationFrame(this.idAnimacion); this.idAnimacion = null; }
-    if (elementoOnda) { elementoOnda.style.opacity = "0"; elementoOnda.style.transform = "scale3d(0, 0, 1)"; }
-    if (botonActivo) { botonActivo.style.transform = "scale3d(1, 1, 1)"; }
+    if (this.estiloOndaCache) { this.estiloOndaCache.opacity = "0"; this.estiloOndaCache.transform = "scale3d(0, 0, 1) translateZ(0)"; }
+    if (this.estiloBotonCache) { this.estiloBotonCache.transform = "scale3d(1, 1, 1) translateZ(0)"; }
     this.escalaActual = 0.2; this.escalaBoton = 1.0; this.faseRespiracion = 0; this.volumenSuavizado = 0;
+    this.estiloOndaCache = null; this.estiloBotonCache = null;
   }
 };
 
 /* ==========================================================================
-   MODULO 4: SÍNTESIS Y REPRODUCCIÓN DE VOZ
+   MODULO 4: SÍNTESIS Y REPRODUCCIÓN DE VOZ (Y PREVENCIÓN DE FUGAS)
    ========================================================================== */
 const moduloSintesisVoz = {
-  vocesDisponibles: [], motorIniciado: false, reproductorAudioActivo: null,
+  vocesDisponibles: [], motorIniciado: false, reproductorAudioActivo: null, ultimaUrlAudio: null,
 
   cargarVoces: function() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -516,6 +532,11 @@ const moduloSintesisVoz = {
       this.reproductorAudioActivo.pause();
       this.reproductorAudioActivo.currentTime = 0;
       this.reproductorAudioActivo = null;
+    }
+    // Liberación de memoria heap bloqueada por blob url
+    if (this.ultimaUrlAudio) {
+      URL.revokeObjectURL(this.ultimaUrlAudio);
+      this.ultimaUrlAudio = null;
     }
   },
 
@@ -545,11 +566,19 @@ const moduloSintesisVoz = {
     this.detenerCualquierAudio();
     if (audioUrlObject && typeof Audio !== 'undefined') {
       try {
+        this.ultimaUrlAudio = audioUrlObject; // Rastreador para GC
         const audio = new Audio(audioUrlObject);
         this.reproductorAudioActivo = audio;
-        audio.onended = () => { this.reproductorAudioActivo = null; };
+        
+        audio.onended = () => { 
+          this.reproductorAudioActivo = null; 
+          URL.revokeObjectURL(audioUrlObject);
+          this.ultimaUrlAudio = null;
+        };
         audio.onerror = () => {
           this.reproductorAudioActivo = null;
+          URL.revokeObjectURL(audioUrlObject);
+          this.ultimaUrlAudio = null;
           this.reproducirTextoVozNativa(texto, codigoIso, iconoDominante);
         };
         audio.play().catch((e) => {
@@ -669,7 +698,6 @@ const moduloServicioTraduccion = {
 
 class GestorEstadoApp {
   constructor(estadoInicial) {
-    // Congelamos el estado inicial para garantizar inmutabilidad corporativa
     this._estado = Object.freeze({ ...estadoInicial });
   }
   obtener() { return this._estado; }
@@ -815,7 +843,8 @@ export default {
       const temporizadores = [];
       let respuestaProcesada = false;
 
-      const procesarRespuestaConEtiqueta = (data, numIntento) => {
+      // Transformado a async para soportar la decodificación NATIVA sin bloquear Main Thread
+      const procesarRespuestaConEtiqueta = async (data, numIntento) => {
         const estadoActual = gestorEstado.obtener();
         if (respuestaProcesada || estadoActual.etiquetasProcesadas.has(data.etiqueta) || data.etiqueta !== estadoActual.etiquetaUltimaValida) return;
 
@@ -856,7 +885,8 @@ export default {
           gestorEstado.actualizar({ memoriaIdiomas: memoriaIdiomasActualizada });
         }
 
-        const audioUrlOptimizado = data.audio_voz ? moduloOptimizacionMemoria.base64ABlobUrl(data.audio_voz) : null;
+        // Llamado asíncrono para decodificación nativa
+        const audioUrlOptimizado = data.audio_voz ? await moduloOptimizacionMemoria.base64ABlobUrl(data.audio_voz) : null;
         const contenedor = dom.mensajesWrapper || dom.chatContainer;
         if (contenedor) {
            contenedor.insertAdjacentHTML('beforeend', moduloPlantillasInterfaz.generarBurbujaHtml(data.hablantes, rol, data.texto_traducido, data.iso_destino, dominante ? dominante.icono_persona : null, audioUrlOptimizado));
