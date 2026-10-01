@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO POR GPU
+   MODULO 1: ESTILOS Y ANIMACIONES CSS DE ALTO RENDIMIENTO POR GPU (TEMA TRASLÚCIDO)
    ========================================================================== */
 const moduloAnimacionesYEstilos = {
   obtenerCss: () => `
@@ -9,9 +9,13 @@ const moduloAnimacionesYEstilos = {
         --sab: env(safe-area-inset-bottom, 0px);
         --sal: env(safe-area-inset-left, 0px);
         --sar: env(safe-area-inset-right, 0px);
+        --header-h: calc(var(--sat) + 58px);
+        --footer-h: calc(var(--sab) + 88px);
+        --vidrio-borde: 1px solid rgba(255, 255, 255, 0.24);
+        --vidrio-luz: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.42);
       }
 
-      /* Viewport estricto sin repintados de scroll elástico */
+      /* Viewport inmersivo con gradiente y efecto de refracción líquida */
       .app-viewport-total {
         width: 100vw;
         height: 100vh;
@@ -27,28 +31,43 @@ const moduloAnimacionesYEstilos = {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         contain: strict;
+        background: radial-gradient(circle at 50% 0%, #161c2c 0%, #0a0e18 55%, #030407 100%);
       }
 
-      /* Animaciones de entrada aceleradas por hardware (Solo transform y opacity) */
+      /* Chat full-bleed: se extiende para que las burbujas pasen por debajo del cristal */
+      #chat-container {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        padding-top: calc(var(--header-h) + 12px);
+        padding-bottom: calc(var(--footer-h) + 16px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        z-index: 10;
+      }
+
+      /* Animaciones de entrada aceleradas por GPU */
       @keyframes animacion-pop-izquierda {
-        0% { opacity: 0; transform: translate3d(-28px, 0, 0) scale(0.96); }
+        0% { opacity: 0; transform: translate3d(-24px, 0, 0) scale(0.96); }
         100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
       }
       
       @keyframes animacion-pop-derecha {
-        0% { opacity: 0; transform: translate3d(28px, 0, 0) scale(0.96); }
+        0% { opacity: 0; transform: translate3d(24px, 0, 0) scale(0.96); }
         100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
       }
 
       @keyframes animacion-orbe-flotante {
-        0% { transform: translate3d(0, 0, 0) scale(1); }
-        50% { transform: translate3d(16px, -20px, 0) scale(1.04); }
-        100% { transform: translate3d(0, 0, 0) scale(1); }
+        0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+        50% { transform: translate3d(24px, -28px, 0) scale(1.1) rotate(12deg); }
+        100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
       }
 
       @keyframes rebote-puntos-escritura {
         0%, 80%, 100% { transform: translate3d(0, 0, 0); }
-        40% { transform: translate3d(0, -5px, 0); }
+        40% { transform: translate3d(0, -6px, 0); }
       }
 
       .punto-escritura {
@@ -58,7 +77,6 @@ const moduloAnimacionesYEstilos = {
         transform: translateZ(0);
       }
 
-      /* Orbes de fondo aislados sin forzar repintado general */
       .orbe-ambiente {
         position: absolute;
         border-radius: 50%;
@@ -68,12 +86,14 @@ const moduloAnimacionesYEstilos = {
         transform: translateZ(0);
       }
 
-      /* BURBUJAS DE CONVERSACIÓN */
+      /* BURBUJAS DE CONVERSACIÓN - ULTRA TRANSLÚCIDAS CON BISEL ESPECULAR */
       .burbuja-personal {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0066ff 100%);
-        box-shadow: 0 6px 20px rgba(0, 102, 255, 0.28);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-bottom-left-radius: 4px !important;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.38) 0%, rgba(0, 102, 255, 0.24) 100%);
+        backdrop-filter: blur(28px) saturate(200%);
+        -webkit-backdrop-filter: blur(28px) saturate(200%);
+        border: var(--vidrio-borde);
+        box-shadow: var(--vidrio-luz), 0 10px 28px rgba(0, 102, 255, 0.22);
+        border-bottom-left-radius: 6px !important;
         animation: animacion-pop-izquierda 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
         will-change: transform, opacity;
         backface-visibility: hidden;
@@ -81,38 +101,75 @@ const moduloAnimacionesYEstilos = {
       }
 
       .burbuja-huesped {
-        background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
-        box-shadow: 0 6px 20px rgba(126, 34, 206, 0.28);
-        border-bottom-right-radius: 4px !important;
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.38) 0%, rgba(126, 34, 206, 0.24) 100%);
+        backdrop-filter: blur(28px) saturate(200%);
+        -webkit-backdrop-filter: blur(28px) saturate(200%);
+        border: var(--vidrio-borde);
+        box-shadow: var(--vidrio-luz), 0 10px 28px rgba(126, 34, 206, 0.22);
+        border-bottom-right-radius: 6px !important;
         animation: animacion-pop-derecha 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
         will-change: transform, opacity;
         backface-visibility: hidden;
         transform: translateZ(0);
       }
 
+      /* CRISTAL SUPERIOR (HEADER) */
       .encabezado-cristal {
-        background: rgba(5, 5, 5, 0.88);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-top: calc(var(--sat) + 0.75rem);
-        padding-bottom: 0.75rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-h);
+        background: linear-gradient(180deg, rgba(13, 17, 27, 0.65) 0%, rgba(13, 17, 27, 0.42) 100%);
+        backdrop-filter: blur(34px) saturate(220%);
+        -webkit-backdrop-filter: blur(34px) saturate(220%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 6px 26px rgba(0, 0, 0, 0.35);
+        padding-top: var(--sat);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         transform: translateZ(0);
       }
 
+      /* CRISTAL INFERIOR (FOOTER DOCK) */
       .pie-pagina-cristal {
-        background: rgba(18, 18, 22, 0.88);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-top: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-        padding-top: 0.75rem;
-        padding-bottom: calc(var(--sab) + 0.75rem);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--footer-h);
+        background: linear-gradient(0deg, rgba(10, 14, 23, 0.72) 0%, rgba(12, 17, 28, 0.48) 100%);
+        backdrop-filter: blur(38px) saturate(220%);
+        -webkit-backdrop-filter: blur(38px) saturate(220%);
+        border-top: 1px solid rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.3), 0 -10px 32px rgba(0, 0, 0, 0.5);
+        padding-bottom: var(--sab);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transform: translateZ(0);
         transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
       }
 
-      /* ONDAS TIPO MEDUSA: Estructura fija preformada para no alterar geometría en caliente */
+      .pastilla-vidrio-luz {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(28px) saturate(190%);
+        -webkit-backdrop-filter: blur(28px) saturate(190%);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 6px 18px rgba(0, 0, 0, 0.3);
+      }
+
+      /* BOTONES FLOTANTES DE CRISTAL LÍQUIDO */
+      .boton-ios-vidrio {
+        backdrop-filter: blur(20px) saturate(190%);
+        -webkit-backdrop-filter: blur(20px) saturate(190%);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.65), inset 0 -2px 5px rgba(0, 0, 0, 0.3), 0 8px 26px rgba(0, 0, 0, 0.45);
+      }
+
+      /* ONDAS TIPO MEDUSA */
       .onda-medusa-base {
         position: absolute;
         inset: -12px;
@@ -126,11 +183,11 @@ const moduloAnimacionesYEstilos = {
       }
 
       #wave-staff {
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.6) 0%, rgba(0, 102, 255, 0.25) 60%, transparent 80%);
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.6) 0%, rgba(0, 102, 255, 0.22) 60%, transparent 80%);
       }
 
       #wave-guest {
-        background: radial-gradient(circle, rgba(192, 132, 252, 0.6) 0%, rgba(126, 34, 206, 0.25) 60%, transparent 80%);
+        background: radial-gradient(circle, rgba(192, 132, 252, 0.6) 0%, rgba(126, 34, 206, 0.22) 60%, transparent 80%);
       }
 
       .pastilla-cancelar {
@@ -186,7 +243,7 @@ const moduloAnimacionesYEstilos = {
       #banner-red-flotante {
         position: absolute;
         left: 50%;
-        bottom: calc(var(--sab) + 84px);
+        bottom: calc(var(--sab) + 94px);
         transform: translate3d(-50%, 14px, 0) scale(0.94);
         opacity: 0;
         pointer-events: none;
@@ -225,23 +282,27 @@ const moduloPlantillasInterfaz = {
   generarEstructuraPrincipal: () => `
     ${moduloAnimacionesYEstilos.obtenerCss()}
 
-    <div class="app-viewport-total bg-[#050505] text-white font-sans select-none relative">
+    <div class="app-viewport-total text-white font-sans select-none relative">
       
-      <div class="orbe-ambiente -top-20 -left-20 w-[60vw] h-[60vw] max-w-[420px] max-h-[420px] bg-sky-600/15 blur-[60px]" style="animation: animacion-orbe-flotante 16s infinite alternate ease-in-out;"></div>
-      <div class="orbe-ambiente -bottom-20 -right-20 w-[60vw] h-[60vw] max-w-[380px] max-h-[380px] bg-purple-600/15 blur-[60px]" style="animation: animacion-orbe-flotante 20s infinite alternate-reverse ease-in-out;"></div>
+      <!-- Orbes ambientales que se refractan al fondo -->
+      <div class="orbe-ambiente -top-24 -left-20 w-[75vw] h-[75vw] max-w-[460px] max-h-[460px] bg-sky-500/20 blur-[90px]" style="animation: animacion-orbe-flotante 14s infinite alternate ease-in-out;"></div>
+      <div class="orbe-ambiente -bottom-24 -right-20 w-[75vw] h-[75vw] max-w-[440px] max-h-[440px] bg-purple-600/25 blur-[90px]" style="animation: animacion-orbe-flotante 18s infinite alternate-reverse ease-in-out;"></div>
+      <div class="orbe-ambiente top-1/2 left-1/3 w-[50vw] h-[50vw] max-w-[320px] max-h-[320px] bg-indigo-500/12 blur-[100px] pointer-events-none"></div>
 
-      <header class="encabezado-cristal shrink-0 z-30 flex flex-col items-center justify-center w-full px-4 shadow-md">
+      <!-- Encabezado translúcido -->
+      <header class="encabezado-cristal shrink-0 z-30 w-full px-4">
         <div class="flex flex-col items-center justify-center">
           <h1 class="text-[17px] sm:text-[19px] font-bold tracking-wide flex items-center justify-center text-center">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600">Planet Hollywood</span>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-purple-400 to-indigo-300 drop-shadow-sm">Planet Hollywood</span>
           </h1>
-          <h2 class="text-[10px] font-semibold text-white/60 tracking-[0.22em] uppercase mt-0.5 text-center">Cancún</h2>
+          <h2 class="text-[10px] font-bold text-white/70 tracking-[0.24em] uppercase mt-0.5 text-center">Cancún</h2>
         </div>
       </header>
 
-      <div id="chat-container" class="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-4 z-10 flex flex-col select-none" style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;">
-        <div class="w-full flex justify-center mb-4 opacity-60 shrink-0">
-          <div class="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-sm text-[10px] font-bold tracking-widest text-white/80 uppercase shadow">
+      <!-- Scroll del chat libre por detrás de la barra superior y dock -->
+      <div id="chat-container" class="px-2 sm:px-4 flex flex-col select-none">
+        <div class="w-full flex justify-center mb-4 opacity-80 shrink-0">
+          <div class="pastilla-vidrio-luz px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-white/90 uppercase">
             Inicio de Conversación
           </div>
         </div>
@@ -250,59 +311,61 @@ const moduloPlantillasInterfaz = {
         <div id="scroll-anchor" class="w-full h-4 shrink-0 pointer-events-none"></div>
       </div>
 
+      <!-- Banner de red flotante -->
       <div id="banner-red-flotante" class="pointer-events-none">
-        <div id="banner-red-contenido" class="px-4 py-2 rounded-full backdrop-blur-md shadow-lg flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all">
+        <div id="banner-red-contenido" class="px-4 py-2 rounded-full pastilla-vidrio-luz flex items-center gap-2 border text-[11px] font-semibold tracking-wide transition-all">
           <span id="banner-red-indicador" class="w-2.5 h-2.5 rounded-full"></span>
           <span id="banner-red-texto">Comprobando conexión...</span>
         </div>
       </div>
 
-      <div id="footer-container" class="pie-pagina-cristal shrink-0 z-30 w-full flex justify-center items-center">
+      <!-- Barra dock inferior translúcida -->
+      <div id="footer-container" class="pie-pagina-cristal shrink-0 z-30 w-full">
         <div class="flex w-full max-w-2xl justify-between items-center px-3 sm:px-6 relative">
           
           <div id="wrapper-staff" class="contenedor-lateral flex flex-row items-center gap-3 relative p-1.5">
             <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
-              <div id="iconos-staff" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-sm leading-none"></div>
-              <p id="lang-staff" class="text-[10px] font-medium text-sky-400 transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
+              <div id="iconos-staff" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow leading-none"></div>
+              <p id="lang-staff" class="text-[10px] font-semibold text-sky-300 drop-shadow transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
             </div>
 
             <div id="container-mic-staff" class="relative flex items-center justify-center rounded-full p-1">
               <div id="wave-staff" class="onda-medusa-base"></div>
               
-              <button id="btn-grabar-staff" class="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#0066ff] flex items-center justify-center shadow-[0_4px_16px_rgba(0,102,255,0.4)] active:scale-95 transition-transform duration-150 relative z-20 border border-sky-300/40">
-                <svg class="w-8 h-8 text-sky-100" fill="currentColor" viewBox="0 0 24 24">
+              <button id="btn-grabar-staff" class="boton-ios-vidrio w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#0ea5e9]/80 to-[#0066ff]/80 flex items-center justify-center active:scale-95 transition-transform duration-150 relative z-20">
+                <svg class="w-8 h-8 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                   <polygon points="12,14.5 13.5,18 12,21.5 10.5,18" fill="#ffffff" opacity="0.95"/>
                 </svg>
               </button>
 
-              <button id="btn-cancelar-staff" class="pastilla-cancelar left-[calc(100%-4px)] h-[44px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-start backdrop-blur-md z-10 active:bg-red-500/30 shadow-md">
+              <button id="btn-cancelar-staff" class="pastilla-cancelar left-[calc(100%-4px)] h-[44px] rounded-full bg-red-500/25 border border-red-400/40 text-red-200 flex items-center justify-start backdrop-blur-2xl z-10 active:bg-red-500/35 shadow-lg">
                 <svg class="w-5 h-5 shrink-0 ml-3 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 <span class="text-[12px] sm:text-[13px] font-bold tracking-wide mr-3">Cancelar</span>
               </button>
             </div>
           </div>
 
-          <div id="divisor" class="w-[1px] h-9 bg-white/10 rounded-full transition-opacity duration-200 mx-2 shrink-0"></div>
+          <div id="divisor" class="w-[1px] h-9 bg-white/20 rounded-full transition-opacity duration-200 mx-2 shrink-0"></div>
 
           <div id="wrapper-guest" class="contenedor-lateral flex flex-row-reverse items-center gap-3 relative p-1.5">
             <div class="flex flex-col items-center justify-center min-w-[50px] sm:min-w-[60px] max-w-[110px]">
-              <div id="iconos-guest" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow-sm leading-none"></div>
-              <p id="lang-guest" class="text-[10px] font-medium text-purple-400 transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
+              <div id="iconos-guest" class="flex flex-wrap items-center justify-center gap-1 text-[16px] drop-shadow leading-none"></div>
+              <p id="lang-guest" class="text-[10px] font-semibold text-purple-300 drop-shadow transition-colors mt-1.5 text-center truncate max-w-[70px]"></p>
             </div>
 
             <div id="container-mic-guest" class="relative flex items-center justify-center rounded-full p-1">
-              <button id="btn-cancelar-guest" class="pastilla-cancelar right-[calc(100%-4px)] h-[44px] rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-end backdrop-blur-md z-10 active:bg-red-500/30 shadow-md">
+              <button id="btn-cancelar-guest" class="pastilla-cancelar right-[calc(100%-4px)] h-[44px] rounded-full bg-red-500/25 border border-red-400/40 text-red-200 flex items-center justify-end backdrop-blur-2xl z-10 active:bg-red-500/35 shadow-lg">
                 <span class="text-[12px] sm:text-[13px] font-bold tracking-wide ml-3">Cancelar</span>
                 <svg class="w-5 h-5 shrink-0 mr-3 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
 
               <div id="wave-guest" class="onda-medusa-base"></div>
               
-              <button id="btn-grabar-guest" class="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#a855f7] to-[#7e22ce] flex items-center justify-center shadow-[0_4px_16px_rgba(126,34,206,0.4)] active:scale-95 transition-transform duration-150 relative z-20 border border-purple-300/40">
-                <svg class="w-8 h-8" viewBox="0 0 24 24">
-                  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77" fill="#f3e8ff"/>
-                  <polygon points="12,2 8.91,8.26 2,9.27 7,14.14 5.82,21.02 12,17.77" fill="#d8b4fe"/>
+              <button id="btn-grabar-guest" class="boton-ios-vidrio w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] rounded-full bg-gradient-to-br from-[#a855f7]/80 to-[#7e22ce]/80 flex items-center justify-center active:scale-95 transition-transform duration-150 relative z-20">
+                <svg class="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24">
+                  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77" fill="#ffffff"/>
+                  <polygon points="12,2 8.91,8.26 2,9.27 7,14.14 5.82,21.02 12,17.77" fill="#e9d5ff"/>
                 </svg>
               </button>
             </div>
@@ -330,25 +393,25 @@ const moduloPlantillasInterfaz = {
       const audioAttr = audioBase64 || '';
 
       const tagIdioma = emojiBandera ? `
-        <div class="flex items-center gap-1.5 mb-2 opacity-90">
-          <span class="text-[12px] bg-black/30 px-2 py-0.5 rounded-full border border-white/10">${emojiBandera}</span>
-          <span class="text-[9px] font-bold tracking-widest uppercase text-white/60">${nombreIdioma}</span>
+        <div class="flex items-center gap-1.5 mb-2 opacity-95">
+          <span class="text-[12px] bg-black/25 px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-md shadow-inner">${emojiBandera}</span>
+          <span class="text-[9px] font-bold tracking-widest uppercase text-white/80 drop-shadow-sm">${nombreIdioma}</span>
         </div>
       ` : '';
 
       return `
-      <div class="item-mensaje flex ${alineacion} w-full my-2 shrink-0">
-        <div class="w-auto ${margenContrario} rounded-[20px] px-4 sm:px-5 py-3 ${claseBurbuja} relative group">
+      <div class="item-mensaje flex ${alineacion} w-full my-2.5 shrink-0">
+        <div class="w-auto ${margenContrario} rounded-[22px] px-4 sm:px-5 py-3.5 ${claseBurbuja} relative group">
           ${tagIdioma}
-          <p class="text-[13px] sm:text-[14px] font-normal leading-snug text-white/70 break-words whitespace-pre-wrap">${h.frase_original || h.texto_original || "..."}</p>
-          <div class="h-[1px] w-full bg-white/10 my-2 rounded-full"></div>
+          <p class="text-[13px] sm:text-[14px] font-normal leading-snug text-white/85 break-words whitespace-pre-wrap">${h.frase_original || h.texto_original || "..."}</p>
+          <div class="h-[1px] w-full bg-white/15 my-2.5 rounded-full"></div>
           
           <div class="flex items-end justify-between gap-3">
-            <p class="text-[16px] sm:text-[18px] font-bold leading-snug text-white break-words whitespace-pre-wrap tracking-tight flex-1">${h.frase_traducida || h.texto_traducida || "..."}</p>
+            <p class="text-[16px] sm:text-[18px] font-bold leading-snug text-white break-words whitespace-pre-wrap tracking-tight flex-1 drop-shadow-sm">${h.frase_traducida || h.texto_traducida || "..."}</p>
             
             <button 
               type="button"
-              class="btn-repetir-voz p-2 -mr-1 -mb-1 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 transition-transform text-white/80 shrink-0"
+              class="btn-repetir-voz p-2 -mr-1 -mb-1 rounded-full bg-white/15 hover:bg-white/25 active:scale-90 transition-transform text-white border border-white/20 backdrop-blur-md shadow-sm shrink-0"
               data-texto="${textoPronunciar}"
               data-iso="${isoPronunciar}"
               data-icono="${iconoFinal}"
@@ -370,22 +433,22 @@ const moduloPlantillasInterfaz = {
     const margenContrario = esStaff ? "mr-8 sm:mr-20" : "ml-8 sm:ml-20";
     const claseBurbuja = esStaff ? "burbuja-personal" : "burbuja-huesped";
     return `
-      <div id="${idUnico}" class="item-mensaje flex ${esStaff ? 'justify-start' : 'justify-end'} w-full my-2 shrink-0">
-        <div class="w-auto ${margenContrario} rounded-[20px] px-5 py-3 ${claseBurbuja} flex items-center gap-1.5 h-[48px]">
-          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0s"></div>
-          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.15s"></div>
-          <div class="w-2.5 h-2.5 bg-white/80 rounded-full punto-escritura" style="animation-delay: 0.3s"></div>
+      <div id="${idUnico}" class="item-mensaje flex ${esStaff ? 'justify-start' : 'justify-end'} w-full my-2.5 shrink-0">
+        <div class="w-auto ${margenContrario} rounded-[22px] px-5 py-3.5 ${claseBurbuja} flex items-center gap-1.5 h-[48px]">
+          <div class="w-2.5 h-2.5 bg-white/90 rounded-full punto-escritura" style="animation-delay: 0s"></div>
+          <div class="w-2.5 h-2.5 bg-white/90 rounded-full punto-escritura" style="animation-delay: 0.15s"></div>
+          <div class="w-2.5 h-2.5 bg-white/90 rounded-full punto-escritura" style="animation-delay: 0.3s"></div>
         </div>
       </div>`;
   },
 
   generarMensajeSistemaHtml: (mensaje, esError = false) => {
     const colorClase = esError 
-      ? "bg-red-500/20 text-red-400 border-red-500/30" 
-      : "bg-white/10 text-white/70 border-white/5";
+      ? "bg-red-500/25 text-red-200 border-red-400/40" 
+      : "bg-white/10 text-white/80 border-white/20";
     return `
       <div class="item-mensaje flex w-full justify-center my-1.5 shrink-0">
-        <div class="${colorClase} border px-4 py-1.5 rounded-full text-[11px] font-medium tracking-wide shadow-sm">
+        <div class="${colorClase} backdrop-blur-2xl border px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-wide shadow-md">
           ${mensaje}
         </div>
       </div>`;
@@ -393,7 +456,7 @@ const moduloPlantillasInterfaz = {
 
   generarPastillaReintentarHtml: (idPastilla) => `
     <div id="${idPastilla}" class="item-mensaje flex w-full justify-center my-1.5 shrink-0">
-      <div class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-4 py-1.5 rounded-full text-[11px] font-medium tracking-wide shadow-md flex items-center gap-2">
+      <div class="bg-amber-500/25 text-amber-200 border border-amber-400/40 backdrop-blur-2xl px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-wide shadow-lg flex items-center gap-2">
         <span>Conexión lenta sin respuesta</span>
         <button type="button" class="btn-ejecutar-reintento underline font-bold hover:text-white transition-colors cursor-pointer">
           Reintentar
@@ -404,14 +467,15 @@ const moduloPlantillasInterfaz = {
 };
 
 /* ==========================================================================
-   MODULO 3: MOTOR MATEMÁTICO DE ONDA MEDUSA (TABLA LUT + LERP PURO)
+   MODULO 3: MOTOR MATEMÁTICO DE ONDA MEDUSA (INICIO SUTIL + ALTA SENSIBILIDAD)
    ========================================================================== */
 const moduloAnimacionMedusa = {
   idAnimacion: null,
-  escalaActual: 1.0,
+  escalaActual: 0.2, // <--- Comienza pequeño y contenido detrás del botón
   escalaBoton: 1.0,
   faseRespiracion: 0,
   ultimoTiempo: 0,
+  volumenSuavizado: 0,
 
   // Tabla Seno precalculada (512 puntos flotantes de 32 bits) para evitar llamadas Math.sin
   LUT_TAMANO: 512,
@@ -429,8 +493,7 @@ const moduloAnimacionMedusa = {
   },
 
   obtenerSenoRapido: function(rad) {
-    // Conversión ultra-rápida de radianes a índice entero bitwise
-    const indice = ((rad * 81.487330863) | 0) & this.LUT_MASCARA; // 512 / (2 * PI) ≈ 81.487330863
+    const indice = ((rad * 81.487330863) | 0) & this.LUT_MASCARA;
     return this.tablaSeno[indice];
   },
 
@@ -438,16 +501,19 @@ const moduloAnimacionMedusa = {
     if (!elementoOnda) return;
     this.inicializarLut();
 
-    this.escalaActual = 1.0;
+    // Arranca sutil y pequeño detrás del icono
+    this.escalaActual = 0.2; 
     this.escalaBoton = 1.0;
     this.faseRespiracion = 0;
+    this.volumenSuavizado = 0;
     this.ultimoTiempo = performance.now();
-    elementoOnda.style.opacity = "1";
+    
+    elementoOnda.style.opacity = "0.4";
+    elementoOnda.style.transform = "scale3d(0.2, 0.2, 1)";
 
     const animarMedusa = (tiempoActual) => {
       this.idAnimacion = requestAnimationFrame(animarMedusa);
       
-      // Control de Delta Time seguro clamp entre 0.5x y 2.0x (16.6ms normalizado)
       const tiempoDeltaMs = tiempoActual - this.ultimoTiempo;
       this.ultimoTiempo = tiempoActual;
       const delta = (tiempoDeltaMs > 0 && tiempoDeltaMs < 100) ? tiempoDeltaMs * 0.06 : 1.0;
@@ -455,39 +521,44 @@ const moduloAnimacionMedusa = {
       let promedioVoz = 0;
       if (analizador && matrizFrecuencia) {
         analizador.getByteFrequencyData(matrizFrecuencia);
-        // Análisis de formantes esenciales de voz humana (bandas 2 a 18)
+        
         let suma = 0;
-        for (let i = 2; i < 18; i++) {
+        const totalBandas = 24;
+        for (let i = 1; i < totalBandas; i++) {
           suma += matrizFrecuencia[i];
         }
-        promedioVoz = suma >> 4; // División entera rápida por 16
+        promedioVoz = suma / totalBandas;
       }
 
-      this.faseRespiracion += (0.045 + (promedioVoz * 0.0012)) * delta;
+      // Filtro inercial con alta sensibilidad a la voz y al ruido ambiente
+      const tasaRespuesta = promedioVoz > this.volumenSuavizado ? 0.75 : 0.25;
+      this.volumenSuavizado += (promedioVoz - this.volumenSuavizado) * tasaRespuesta;
+
+      this.faseRespiracion += (0.045 + (this.volumenSuavizado * 0.0018)) * delta;
       
-      // Variación elástica asimétrica sin alterar border-radius (0% repintado de layout)
       const senFase = this.obtenerSenoRapido(this.faseRespiracion);
-      const cosFase = this.obtenerSenoRapido(this.faseRespiracion + 1.5708); // + PI/2
+      const cosFase = this.obtenerSenoRapido(this.faseRespiracion + 1.5708);
 
-      let escalaObjetivo = 1.06 + (senFase * 0.05);
-      if (promedioVoz > 4) {
-        escalaObjetivo = Math.min(1.48, 1.1 + ((promedioVoz - 4) * 0.0048));
-      }
+      // Si hay silencio se mantiene pequeño (~0.35), y al hablar se expande dinámicamente hasta 1.85 con gran sensibilidad
+      let escalaObjetivo = 0.35 + (senFase * 0.05) + (this.volumenSuavizado * 0.012);
+      escalaObjetivo = Math.min(1.85, Math.max(0.2, escalaObjetivo));
 
-      // Ecuación de Lerp amortiguado exponencial matemáticamente estable
-      // factor = 1 - exp(-rigidez * delta)
-      const factorAmortiguacion = 1 - Math.exp(-0.28 * delta);
+      const factorAmortiguacion = 1 - Math.exp(-0.35 * delta);
       this.escalaActual += (escalaObjetivo - this.escalaActual) * factorAmortiguacion;
 
-      const escalaX = (this.escalaActual * (1.0 + senFase * 0.04)).toFixed(3);
-      const escalaY = (this.escalaActual * (1.0 - cosFase * 0.04)).toFixed(3);
+      // Opacidad adaptativa: casi invisible en silencio, brillante y expansiva al hablar
+      const opacidadObjetivo = Math.min(0.95, Math.max(0.3, 0.3 + (this.volumenSuavizado * 0.035)));
+      elementoOnda.style.opacity = opacidadObjetivo.toFixed(2);
+
+      const escalaX = (this.escalaActual * (1.0 + senFase * 0.045)).toFixed(3);
+      const escalaY = (this.escalaActual * (1.0 - cosFase * 0.045)).toFixed(3);
       const rotacion = (this.faseRespiracion * 9.5).toFixed(1);
 
-      // Mutación exclusiva sobre transform GPU 3D
+      // Mutación exclusiva sobre transform GPU (mantiene rendimiento fluido a 60 FPS)[cite: 1]
       elementoOnda.style.transform = `scale3d(${escalaX}, ${escalaY}, 1) rotate(${rotacion}deg)`;
 
       if (botonActivo) {
-        const objetivoBoton = 1.0 - (this.escalaActual - 1.0) * 0.07;
+        const objetivoBoton = 1.0 - (Math.max(0, this.escalaActual - 0.5)) * 0.04;
         this.escalaBoton += (objetivoBoton - this.escalaBoton) * factorAmortiguacion;
         botonActivo.style.transform = `scale3d(${this.escalaBoton.toFixed(3)}, ${this.escalaBoton.toFixed(3)}, 1)`;
       }
@@ -511,9 +582,10 @@ const moduloAnimacionMedusa = {
       botonActivo.style.transform = "scale3d(1, 1, 1)";
     }
 
-    this.escalaActual = 1.0;
+    this.escalaActual = 0.2;
     this.escalaBoton = 1.0;
     this.faseRespiracion = 0;
+    this.volumenSuavizado = 0;
   }
 };
 
@@ -773,6 +845,7 @@ export default {
 
     let state = {
       grabandoRol: null,
+      bloqueoTransicion: false, // Candado atómico para neutralizar clicks repetidos rápidos
       canceladoManualmente: false,
       tiempoInicio: 0,
       idEscribiendo: null,
@@ -1032,8 +1105,12 @@ export default {
     };
 
     const iniciarGrabacion = async (rol) => {
+      if (state.bloqueoTransicion) return;
+      state.bloqueoTransicion = true;
+
       if (!moduloMonitorConexion.enLinea) {
         moduloMonitorConexion.mostrarEstado(false, "No puedes grabar sin internet.");
+        state.bloqueoTransicion = false;
         return;
       }
 
@@ -1065,7 +1142,7 @@ export default {
         
         const source = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64; // Reducción de FFT para consumo mínimo de ciclos de CPU en móviles
+        analyser.fftSize = 64;
         analyser.smoothingTimeConstant = 0.8;
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -1092,6 +1169,8 @@ export default {
             for (let i = 0; i < tracks.length; i++) tracks[i].stop();
             activeStream = null;
           }
+
+          state.bloqueoTransicion = false;
           
           if (state.canceladoManualmente) {
             setEstadoVisual("idle");
@@ -1118,24 +1197,40 @@ export default {
         const botonActivo = rol === 'staff' ? dom.btnGrabarStaff : dom.btnGrabarGuest;
         moduloAnimacionMedusa.iniciarMedusa(analyser, dataArray, elementoOnda, botonActivo);
 
+        state.bloqueoTransicion = false;
+
       } catch (err) {
+        state.bloqueoTransicion = false;
         alert("Activa los permisos del micrófono para continuar.");
         setEstadoVisual("idle");
       }
     };
 
     const detenerGrabacion = () => {
+      if (state.bloqueoTransicion) return;
+
+      const elementoOnda = state.grabandoRol === 'staff' ? dom.waveStaff : dom.waveGuest;
+      const botonActivo = state.grabandoRol === 'staff' ? dom.btnGrabarStaff : dom.btnGrabarGuest;
+      moduloAnimacionMedusa.detenerMedusa(elementoOnda, botonActivo);
+
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        state.bloqueoTransicion = true;
         mediaRecorder.stop();
+      } else {
+        setEstadoVisual("idle");
       }
       state.grabandoRol = null;
     };
 
     const handleGrabarClick = (rol) => {
+      if (state.bloqueoTransicion) return;
+
       if (state.grabandoRol === rol) {
         detenerGrabacion();
       } else { 
-        if (state.grabandoRol) detenerGrabacion(); 
+        if (state.grabandoRol) {
+          detenerGrabacion();
+        }
         iniciarGrabacion(rol); 
       }
     };
